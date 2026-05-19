@@ -30,7 +30,7 @@ const bottomItems = [
 ];
 
 export default function Sidebar({ currentView, onNavigate }) {
-  const workspace = 'My Workspace';
+  const workspace = "Frida Ruh's workspace";
   const color = workspaceColor(workspace);
 
   return (
