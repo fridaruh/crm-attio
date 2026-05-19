@@ -178,12 +178,11 @@ export default function DealCard({ deal, company, tasks = [], onAddTask, onClick
       onMouseLeave={e => { if (!isDragging) e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.04)'; }}
     >
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 11 }}>
-        <CompanyAvatar name={company?.name || deal.name} />
+      <div style={{ marginBottom: 11 }}>
         <span style={{
           fontWeight: 600, fontSize: 13.5, color: '#111827',
           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-          flex: 1,
+          display: 'block',
         }}>
           {deal.name}
         </span>
