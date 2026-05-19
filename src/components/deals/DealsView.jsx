@@ -5,8 +5,8 @@ import { STAGE_CONFIG, formatCurrency } from './DealCard';
 import Avatar from '../shared/Avatar';
 
 export default function DealsView({
-  deals, tasks, getCompany, getContact,
-  onMoveDeal, onAddDeal, onSelectDeal, onArchiveDeal, onAddTask,
+  deals, tasks, notes, getCompany, getContact,
+  onMoveDeal, onAddDeal, onSelectDeal, onArchiveDeal, onAddTask, onAddNote,
 }) {
   const [view, setView]               = useState('kanban');
   const [search, setSearch]           = useState('');
@@ -117,11 +117,13 @@ export default function DealsView({
           <KanbanBoard
             deals={filtered}
             tasks={tasks}
+            notes={notes}
             getCompany={getCompany}
             onMoveDeal={onMoveDeal}
             onSelectDeal={onSelectDeal}
             onAddDeal={onAddDeal}
             onAddTask={onAddTask}
+            onAddNote={onAddNote}
           />
         ) : (
           <DealsTable

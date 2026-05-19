@@ -92,6 +92,7 @@ export default function App() {
           <DealsView
             deals={deals}
             tasks={tasks}
+            notes={notes}
             getCompany={getCompany}
             getContact={getContact}
             onMoveDeal={moveDeal}
@@ -99,6 +100,7 @@ export default function App() {
             onSelectDeal={(deal) => setSelectedDealId(deal.id)}
             onArchiveDeal={archiveDeal}
             onAddTask={addTask}
+            onAddNote={addNote}
           />
         )}
 
