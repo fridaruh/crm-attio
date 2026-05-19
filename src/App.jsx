@@ -91,12 +91,14 @@ export default function App() {
         ) : view === 'deals' && (
           <DealsView
             deals={deals}
+            tasks={tasks}
             getCompany={getCompany}
             getContact={getContact}
             onMoveDeal={moveDeal}
             onAddDeal={openAddDeal}
             onSelectDeal={(deal) => setSelectedDealId(deal.id)}
             onArchiveDeal={archiveDeal}
+            onAddTask={addTask}
           />
         )}
 

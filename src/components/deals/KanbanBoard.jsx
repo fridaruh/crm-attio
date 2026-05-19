@@ -10,7 +10,7 @@ const STAGES = [
   'Pagado',
 ];
 
-export default function KanbanBoard({ deals, getCompany, onMoveDeal, onSelectDeal, onAddDeal }) {
+export default function KanbanBoard({ deals, getCompany, tasks, onMoveDeal, onSelectDeal, onAddDeal, onAddTask }) {
   function handleDragEnd(result) {
     const { destination, source, draggableId } = result;
     if (!destination) return;
@@ -154,6 +154,8 @@ export default function KanbanBoard({ deals, getCompany, onMoveDeal, onSelectDea
                             <DealCard
                               deal={deal}
                               company={getCompany(deal.company_id)}
+                              tasks={tasks}
+                              onAddTask={onAddTask}
                               isDragging={snapshot.isDragging}
                               onClick={() => onSelectDeal(deal)}
                             />
