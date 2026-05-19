@@ -1,6 +1,7 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { User, DollarSign, CheckSquare, FileText, Clock } from 'lucide-react';
 import Avatar from '../shared/Avatar';
+import CreateTaskModal from '../shared/CreateTaskModal';
 
 export const STAGE_CONFIG = {
   'Lead':              { color: '#6B7280', bg: '#F9FAFB',  label: 'Lead' },
@@ -39,73 +40,6 @@ function Row({ icon, children }) {
   );
 }
 
-// ─── Task popover ──────────────────────────────────────────────────────────────
-function TaskPopover({ deal, tasks, onAddTask, onClose }) {
-  const [title, setTitle] = useState('');
-  const inputRef = useRef(null);
-  const pending = tasks.filter(t => String(t.deal_id) === String(deal.id) && !t.completed);
-
-  useEffect(() => { inputRef.current?.focus(); }, []);
-
-  function handleAdd() {
-    if (!title.trim()) return;
-    onAddTask({ title: title.trim(), deal_id: deal.id, due_date: null, assignee: 'Frida Ruh' });
-    setTitle('');
-  }
-
-  return (
-    <div
-      onClick={e => e.stopPropagation()}
-      style={{
-        position: 'absolute', bottom: 'calc(100% + 6px)', left: 0, zIndex: 60,
-        width: 230, background: 'white', border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-md)', boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-        padding: 10,
-      }}
-    >
-      {pending.length > 0 && (
-        <div style={{ marginBottom: 8, maxHeight: 88, overflowY: 'auto' }}>
-          {pending.map(t => (
-            <div key={t.id} style={{
-              fontSize: 12, color: 'var(--text-secondary)', padding: '3px 0',
-              display: 'flex', alignItems: 'center', gap: 5,
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-            }}>
-              <CheckSquare size={11} color="var(--purple)" style={{ flexShrink: 0 }} />
-              {t.title}
-            </div>
-          ))}
-        </div>
-      )}
-      <div style={{ display: 'flex', gap: 5 }}>
-        <input
-          ref={inputRef}
-          value={title}
-          onChange={e => setTitle(e.target.value)}
-          onKeyDown={e => {
-            if (e.key === 'Enter') handleAdd();
-            if (e.key === 'Escape') onClose();
-          }}
-          placeholder="New task…"
-          style={{
-            flex: 1, fontSize: 12.5, padding: '5px 8px',
-            border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
-            outline: 'none', fontFamily: 'inherit', color: 'var(--text)',
-          }}
-        />
-        <button
-          onClick={handleAdd}
-          style={{
-            fontSize: 12, padding: '5px 10px', borderRadius: 'var(--radius-sm)',
-            background: 'var(--purple)', color: 'white', fontWeight: 600,
-          }}
-        >
-          Add
-        </button>
-      </div>
-    </div>
-  );
-}
 
 // ─── Note popover ──────────────────────────────────────────────────────────────
 function NotePopover({ deal, notes, onAddNote, onClose }) {
@@ -278,10 +212,9 @@ export default function DealCard({
         )}
 
         {openPopover === 'task' && (
-          <TaskPopover
-            deal={deal}
-            tasks={tasks}
-            onAddTask={(t) => { onAddTask(t); }}
+          <CreateTaskModal
+            defaultRecord={{ id: deal.id, type: 'deal', label: deal.name }}
+            onSave={(t) => { onAddTask(t); setOpenPopover(null); }}
             onClose={() => setOpenPopover(null)}
           />
         )}
