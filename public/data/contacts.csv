@@ -1,0 +1,13 @@
+id,name,email,phone,company_id,title,department,created_at
+1,Sarah Chen,sarah.chen@acme.com,+1 415 555 0101,1,VP of Sales,Sales,2024-01-15
+2,James Miller,james.miller@techstream.io,+1 212 555 0102,2,CTO,Engineering,2024-01-20
+3,Maria Rodriguez,maria.r@globex.com,+1 512 555 0103,3,Head of Product,Product,2024-02-01
+4,David Park,d.park@initech.co,+1 617 555 0104,4,CEO,Executive,2024-02-10
+5,Emma Wilson,emma.w@dundermifflin.tech,+1 570 555 0105,5,Sales Director,Sales,2024-02-15
+6,Alex Thompson,alex.t@umbrella.digital,+1 213 555 0106,6,CMO,Marketing,2024-03-01
+7,Rachel Green,r.green@hooli.com,+1 650 555 0107,7,VP Engineering,Engineering,2024-03-10
+8,Michael Scott,m.scott@dundermifflin.tech,+1 570 555 0108,5,Regional Manager,Sales,2024-03-15
+9,Lisa Zhang,lisa.zhang@techstream.io,+1 212 555 0109,2,Head of Sales,Sales,2024-03-20
+10,Ryan Howard,ryan.h@piedpiper.com,+1 650 555 0110,8,Business Development,Sales,2024-04-01
+11,Tom Hanson,tom.h@acme.com,+1 415 555 0111,1,Account Executive,Sales,2024-04-05
+12,Nina Patel,nina.p@globex.com,+1 512 555 0112,3,Sales Manager,Sales,2024-04-10

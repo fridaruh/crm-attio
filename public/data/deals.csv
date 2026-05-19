@@ -1,0 +1,15 @@
+id,name,company_id,contact_id,value,stage,owner,created_at,close_date,currency,notes
+1,Enterprise License - Q2,1,1,125000,negotiation,Sarah Chen,2024-01-20,2024-06-30,USD,Promising deal with strong executive buy-in
+2,SaaS Platform Upgrade,2,9,48000,proposal_sent,Lisa Zhang,2024-02-01,2024-05-31,USD,
+3,Annual Software Contract,3,3,220000,closed_won,Maria Rodriguez,2024-01-15,2024-03-31,USD,Contract signed and payment received
+4,Digital Transformation,4,4,85000,meeting_booked,David Park,2024-02-15,2024-07-31,USD,
+5,Growth Package,5,5,32000,qualification,Emma Wilson,2024-03-01,2024-08-31,USD,
+6,Marketing Suite Pro,6,6,67000,proposal_sent,Alex Thompson,2024-03-10,2024-06-30,USD,
+7,Infrastructure Contract,7,7,480000,negotiation,Rachel Green,2024-02-20,2024-06-30,USD,Largest deal in pipeline - legal review ongoing
+8,Startup Bundle,8,10,15000,qualification,Ryan Howard,2024-04-01,2024-09-30,USD,
+9,Team Expansion License,1,11,56000,meeting_booked,Tom Hanson,2024-03-15,2024-07-31,USD,
+10,Regional Deal - West,3,12,95000,closed_won,Nina Patel,2024-01-10,2024-02-28,USD,
+11,Basic Plan Trial,5,8,18000,closed_lost,Michael Scott,2024-02-01,2024-04-30,USD,Customer went with competitor
+12,API Integration Deal,2,2,29000,meeting_booked,James Miller,2024-04-05,2024-08-31,USD,
+13,Security Suite,7,7,340000,qualification,Rachel Green,2024-04-10,2024-10-31,USD,
+14,Analytics Platform,1,1,78000,proposal_sent,Sarah Chen,2024-04-15,2024-07-31,USD,

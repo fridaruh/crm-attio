@@ -1,0 +1,550 @@
+{
+  "google.com": {
+    "location": "United States",
+    "founded": "1998",
+    "employees": 219238,
+    "industry": "Internet",
+    "linkedin": "linkedin.com/company/google",
+    "_enriched": true
+  },
+  "revolut.com": {
+    "location": "United Kingdom",
+    "founded": "2014",
+    "employees": 2100,
+    "industry": "Information technology and services",
+    "linkedin": "linkedin.com/company/revolut",
+    "_enriched": true
+  },
+  "f6s.com": {
+    "location": "United Kingdom",
+    "founded": "2011",
+    "employees": 112,
+    "industry": "Internet",
+    "linkedin": "linkedin.com/company/f6s",
+    "_enriched": true
+  },
+  "fireflies.ai": {
+    "location": "United States",
+    "founded": "2015",
+    "employees": 28,
+    "industry": "Computer software",
+    "linkedin": "linkedin.com/company/fireflies-inc",
+    "_enriched": true
+  },
+  "acadium.com": {
+    "_enriched": true
+  },
+  "aisecret.us": {
+    "_enriched": true
+  },
+  "wip.co": {
+    "_enriched": true
+  },
+  "needed.education": {
+    "_enriched": true
+  },
+  "3angle.mx": {
+    "_enriched": true
+  },
+  "tesa.lat": {
+    "_enriched": true
+  },
+  "samsung.com": {
+    "location": "Hungary",
+    "founded": "1938",
+    "employees": 118428,
+    "industry": "Consumer electronics",
+    "linkedin": "linkedin.com/company/samsung-electronics",
+    "_enriched": true
+  },
+  "iadb.org": {
+    "location": "United States",
+    "founded": "1959",
+    "employees": 5192,
+    "industry": "Banking",
+    "linkedin": "linkedin.com/company/inter-american-development-bank",
+    "_enriched": true
+  },
+  "coinbase.com": {
+    "location": "United States",
+    "founded": "2012",
+    "employees": 1477,
+    "industry": "Internet",
+    "linkedin": "linkedin.com/company/coinbase",
+    "_enriched": true
+  },
+  "fintual.com": {
+    "location": "Chile",
+    "founded": "2016",
+    "employees": 52,
+    "industry": "Internet",
+    "linkedin": "linkedin.com/company/fintual",
+    "_enriched": true
+  },
+  "riskmathics.com": {
+    "location": "Mexico",
+    "founded": "2005",
+    "employees": 21,
+    "industry": "Financial services",
+    "linkedin": "linkedin.com/company/riskmathics",
+    "_enriched": true
+  },
+  "dev3pack.xyz": {
+    "_enriched": true
+  },
+  "karemsuarez.com": {
+    "_enriched": true
+  },
+  "soif.org.uk": {
+    "location": "United Kingdom",
+    "founded": "2012",
+    "employees": 18,
+    "industry": "Think tanks",
+    "linkedin": "linkedin.com/company/soif",
+    "_enriched": true
+  },
+  "huggingface.co": {
+    "founded": "2016",
+    "employees": 30,
+    "industry": "Computer software",
+    "linkedin": "linkedin.com/company/huggingface",
+    "_enriched": true
+  },
+  "anahuac.mx": {
+    "location": "Mexico",
+    "founded": "1964",
+    "employees": 1378,
+    "industry": "Higher education",
+    "linkedin": "linkedin.com/company/universidad-anahuac_50453",
+    "_enriched": true
+  },
+  "laboratoria.la": {
+    "founded": "2014",
+    "employees": 6,
+    "industry": "Education management",
+    "linkedin": "linkedin.com/company/laboratoria",
+    "_enriched": true
+  },
+  "heygen.com": {
+    "_enriched": true
+  },
+  "attio.com": {
+    "location": "United Kingdom",
+    "founded": "2019",
+    "employees": 10,
+    "industry": "Computer software",
+    "linkedin": "linkedin.com/company/attio",
+    "_enriched": true
+  },
+  "usehandle.ai": {
+    "_enriched": true
+  },
+  "thehiringrevolution.com": {
+    "_enriched": true
+  },
+  "prospectivistas-edm.slack.com": {
+    "_enriched": true
+  },
+  "santillana.com": {
+    "location": "Spain",
+    "founded": "1960",
+    "employees": 2832,
+    "industry": "Publishing",
+    "linkedin": "linkedin.com/company/grupo-santillana",
+    "_enriched": true
+  },
+  "miranda-gr.com": {
+    "_enriched": true
+  },
+  "mmaglobal.com": {
+    "location": "United States",
+    "founded": "2000",
+    "employees": 1413,
+    "industry": "Marketing and advertising",
+    "linkedin": "linkedin.com/company/mobile-marketing-association",
+    "_enriched": true
+  },
+  "asefimex.com": {
+    "_enriched": true
+  },
+  "fcdo.gov.uk": {
+    "_enriched": true
+  },
+  "marketingfuturetoday.com": {
+    "_enriched": true
+  },
+  "ciencias.unam.mx": {
+    "_enriched": true
+  },
+  "unesco.org": {
+    "location": "France",
+    "founded": "1945",
+    "employees": 5876,
+    "industry": "International affairs",
+    "linkedin": "linkedin.com/company/unesco",
+    "_enriched": true
+  },
+  "tec.mx": {
+    "_enriched": true
+  },
+  "hi.vc": {
+    "_enriched": true
+  },
+  "coppel.com": {
+    "location": "Mexico",
+    "founded": "1941",
+    "employees": 9759,
+    "industry": "Retail",
+    "linkedin": "linkedin.com/company/coppel-sa-de-cv",
+    "_enriched": true
+  },
+  "iaran.org": {
+    "location": "United Kingdom",
+    "founded": "2012",
+    "employees": 13,
+    "industry": "Non-profit organization management",
+    "linkedin": "linkedin.com/company/iaran",
+    "_enriched": true
+  },
+  "nuclio.school": {
+    "_enriched": true
+  },
+  "rubberbandpr.com": {
+    "founded": "2008",
+    "employees": 1,
+    "industry": "Design",
+    "linkedin": "linkedin.com/company/rubberband-llp",
+    "_enriched": true
+  },
+  "jmailservice.com": {
+    "_enriched": true
+  },
+  "regsvc.com": {
+    "_enriched": true
+  },
+  "connecteducation.mx": {
+    "_enriched": true
+  },
+  "zoom.us": {
+    "location": "United States",
+    "founded": "2011",
+    "employees": 631,
+    "industry": "Information technology and services",
+    "linkedin": "linkedin.com/company/zoom-video-communications-inc-",
+    "_enriched": true
+  },
+  "soypaolavillarreal.com": {
+    "_enriched": true
+  },
+  "openai.com": {
+    "founded": "2015",
+    "employees": 158,
+    "industry": "Computer software",
+    "linkedin": "linkedin.com/company/openai",
+    "_enriched": true
+  },
+  "usp.br": {
+    "location": "Brazil",
+    "employees": 7498,
+    "industry": "Higher education",
+    "linkedin": "linkedin.com/company/universidade-de-s-o-paulo",
+    "_enriched": true
+  },
+  "gmfus.org": {
+    "location": "United States",
+    "employees": 651,
+    "industry": "Non-profit organization management",
+    "linkedin": "linkedin.com/company/gmf",
+    "_enriched": true
+  },
+  "niitmts.com": {
+    "_enriched": true
+  },
+  "mobilityado.com": {
+    "location": "Mexico",
+    "founded": "1939",
+    "employees": 1469,
+    "industry": "Transportation/trucking/railroad",
+    "linkedin": "linkedin.com/company/mobilityado",
+    "_enriched": true
+  },
+  "getobok.com": {
+    "_enriched": true
+  },
+  "simalco.com": {
+    "_enriched": true
+  },
+  "weforum.org": {
+    "_enriched": true,
+    "location": "Switzerland",
+    "founded": "1971",
+    "employees": 3332,
+    "industry": "Non-profit organization management",
+    "linkedin": "linkedin.com/company/world-economic-forum"
+  },
+  "superhuman.com": {
+    "_enriched": true,
+    "location": "United States",
+    "founded": "2015",
+    "employees": 69,
+    "industry": "Internet",
+    "linkedin": "linkedin.com/company/superhuman-co"
+  },
+  "nas.io": {
+    "_enriched": true
+  },
+  "collectiveacademy.com": {
+    "_enriched": true
+  },
+  "isdi.education": {
+    "_enriched": true,
+    "location": "United States",
+    "founded": "1990",
+    "employees": 293,
+    "industry": "Hospital & health care",
+    "linkedin": "linkedin.com/company/pangkas-rambut"
+  },
+  "isdi.mx": {
+    "_enriched": true
+  },
+  "rojo.me": {
+    "_enriched": true
+  },
+  "wavynode.com": {
+    "_enriched": true
+  },
+  "eon-institute.com": {
+    "_enriched": true
+  },
+  "hd.company": {
+    "_enriched": true,
+    "employees": 11,
+    "industry": "Management consulting",
+    "linkedin": "linkedin.com/company/hdcompany"
+  },
+  "sussex.ac.uk": {
+    "_enriched": true,
+    "location": "United Kingdom",
+    "founded": "1961",
+    "employees": 2105,
+    "industry": "Higher education",
+    "linkedin": "linkedin.com/company/university-of-sussex"
+  },
+  "conjur.com.mx": {
+    "_enriched": true
+  },
+  "chevening.org": {
+    "_enriched": true,
+    "location": "United Kingdom",
+    "founded": "1983",
+    "employees": 186,
+    "industry": "Higher education",
+    "linkedin": "linkedin.com/company/chevening-scholarships"
+  },
+  "kellyservices.com": {
+    "_enriched": true,
+    "location": "United States",
+    "founded": "1946",
+    "employees": 14262,
+    "industry": "Staffing and recruiting",
+    "linkedin": "linkedin.com/company/kellyservices"
+  },
+  "colectivo23.com": {
+    "_enriched": true,
+    "location": "Peru",
+    "employees": 20,
+    "industry": "Higher education",
+    "linkedin": "linkedin.com/company/colectivo23"
+  },
+  "cargill.com": {
+    "_enriched": true,
+    "location": "United States",
+    "founded": "1865",
+    "employees": 53769,
+    "industry": "Food production",
+    "linkedin": "linkedin.com/company/cargill"
+  },
+  "miranda-partners.com": {
+    "_enriched": true,
+    "location": "Mexico",
+    "founded": "2018",
+    "employees": 25,
+    "industry": "Public relations and communications",
+    "linkedin": "linkedin.com/company/miranda-partners"
+  },
+  "ibero.mx": {
+    "_enriched": true,
+    "location": "Mexico",
+    "founded": "1943",
+    "employees": 1580,
+    "industry": "Higher education",
+    "linkedin": "linkedin.com/company/universidad-iberoamericana"
+  },
+  "iabmexico.com": {
+    "_enriched": true,
+    "location": "Mexico",
+    "founded": "2005",
+    "employees": 49,
+    "industry": "Marketing and advertising",
+    "linkedin": "linkedin.com/company/iabmexico"
+  },
+  "elpocas.com": {
+    "_enriched": true
+  },
+  "clientify.com": {
+    "_enriched": true,
+    "founded": "2014",
+    "employees": 21,
+    "industry": "Internet",
+    "linkedin": "linkedin.com/company/clientify"
+  },
+  "hibrids.com": {
+    "_enriched": true
+  },
+  "plaud.ai": {
+    "_enriched": true
+  },
+  "condenast.com.mx": {
+    "_enriched": true
+  },
+  "starcomww.com": {
+    "_enriched": true,
+    "location": "United States",
+    "employees": 6067,
+    "industry": "Marketing and advertising",
+    "linkedin": "linkedin.com/company/starcom1"
+  },
+  "alfasigma.com": {
+    "_enriched": true,
+    "location": "Italy",
+    "founded": "2015",
+    "employees": 1192,
+    "industry": "Pharmaceuticals",
+    "linkedin": "linkedin.com/company/alfasigma"
+  },
+  "marhnos.com.mx": {
+    "_enriched": true,
+    "location": "Mexico",
+    "founded": "1954",
+    "employees": 382,
+    "industry": "Construction",
+    "linkedin": "linkedin.com/company/marhnos"
+  },
+  "isdi.com.mx": {
+    "_enriched": true
+  },
+  "aithenewsexy.com": {
+    "_enriched": true
+  },
+  "centro.edu.mx": {
+    "_enriched": true,
+    "location": "Mexico",
+    "founded": "2005",
+    "employees": 26,
+    "industry": "Education management",
+    "linkedin": "linkedin.com/company/universidad-centro-educaci-n-cont-nua"
+  },
+  "creator.headai.io": {
+    "_enriched": true
+  },
+  "coca-cola.com": {
+    "_enriched": true,
+    "location": "Canada",
+    "founded": "1892",
+    "employees": 407,
+    "industry": "Food & beverages",
+    "linkedin": "linkedin.com/company/coca-colaa"
+  },
+  "platzi.com": {
+    "_enriched": true,
+    "location": "United States",
+    "founded": "2012",
+    "employees": 33,
+    "industry": "E-learning",
+    "linkedin": "linkedin.com/company/platzi-inc"
+  },
+  "talent-network.org": {
+    "_enriched": true,
+    "location": "Mexico",
+    "founded": "2017",
+    "employees": 65,
+    "industry": "Events services",
+    "linkedin": "linkedin.com/company/talent-network-matrix"
+  },
+  "finnosummit.com": {
+    "_enriched": true
+  },
+  "blackbot.rocks": {
+    "_enriched": true,
+    "location": "Mexico",
+    "founded": "2016",
+    "employees": 4,
+    "industry": "Marketing and advertising",
+    "linkedin": "linkedin.com/company/blackbot"
+  },
+  "studyacrossthepond.com": {
+    "_enriched": true,
+    "location": "United States",
+    "founded": "2004",
+    "employees": 21,
+    "industry": "Higher education",
+    "linkedin": "linkedin.com/company/across-the-pond-usa"
+  },
+  "crehana.com": {
+    "_enriched": true,
+    "location": "Peru",
+    "founded": "2015",
+    "employees": 67,
+    "industry": "Internet",
+    "linkedin": "linkedin.com/company/crehana"
+  },
+  "kiwihub.ai": {
+    "_enriched": true
+  },
+  "nhs.net": {
+    "_enriched": true,
+    "location": "United Kingdom",
+    "employees": 31835,
+    "industry": "Hospital & health care",
+    "linkedin": "linkedin.com/company/nhs-trust"
+  },
+  "lu.ma": {
+    "_enriched": true,
+    "employees": 4,
+    "industry": "Entertainment",
+    "linkedin": "linkedin.com/company/zmurl"
+  },
+  "eidosglobal.org": {
+    "_enriched": true
+  },
+  "be-cgi.com": {
+    "_enriched": true
+  },
+  "mastercard.com": {
+    "_enriched": true,
+    "location": "United States",
+    "founded": "1966",
+    "employees": 29583,
+    "industry": "Information technology and services",
+    "linkedin": "linkedin.com/company/mastercard"
+  },
+  "sib.wedonthavetime.org": {
+    "_enriched": true
+  },
+  "calendly.com": {
+    "_enriched": true,
+    "location": "United States",
+    "founded": "2013",
+    "employees": 188,
+    "industry": "Computer software",
+    "linkedin": "linkedin.com/company/calendly"
+  },
+  "canvas8.com": {
+    "_enriched": true,
+    "location": "United Kingdom",
+    "founded": "2008",
+    "employees": 89,
+    "industry": "Marketing and advertising",
+    "linkedin": "linkedin.com/company/canvas8"
+  }
+}

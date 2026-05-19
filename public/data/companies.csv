@@ -1,0 +1,9 @@
+id,name,domain,location,employees,industry,founded,description
+1,Acme Corporation,acme.com,San Francisco CA,250,Software,2015,Enterprise software solutions for modern teams
+2,TechStream Inc,techstream.io,New York NY,85,SaaS,2018,Real-time data streaming platform for enterprise
+3,Globex Systems,globex.com,Austin TX,1200,Enterprise,2010,Global enterprise management and consulting solutions
+4,Initech Solutions,initech.co,Boston MA,45,Consulting,2019,Technology consulting and digital transformation
+5,Dunder Mifflin Tech,dundermifflin.tech,Scranton PA,32,B2B Software,2020,Modern B2B sales tools for small businesses
+6,Umbrella Digital,umbrella.digital,Los Angeles CA,180,Marketing,2016,Digital marketing and growth platform
+7,Hooli Corp,hooli.com,Palo Alto CA,5000,Tech,2012,World-changing technology for the modern era
+8,Pied Piper,piedpiper.com,Menlo Park CA,12,Startup,2023,Revolutionary data compression technology
