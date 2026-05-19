@@ -79,16 +79,17 @@ const CustomTooltip = ({ active, payload, label, prefix = '$' }) => {
 };
 
 export default function IncomeReport({ deals }) {
-  const paidDeals = deals.filter(d => d.stage === PAID_STAGE && d.value > 0);
-  const inPipeline = deals
+  const activeDeals = deals.filter(d => !d.archived);
+  const paidDeals = activeDeals.filter(d => d.stage === PAID_STAGE && d.value > 0);
+  const inPipeline = activeDeals
     .filter(d => d.stage !== PAID_STAGE)
     .reduce((s, d) => s + (Number(d.value) || 0), 0);
   const totalPaid = paidDeals.reduce((s, d) => s + (Number(d.value) || 0), 0);
-  const totalDeals = deals.length;
+  const totalDeals = activeDeals.length;
 
-  const monthlyData = buildMonthlyData(deals);
+  const monthlyData = buildMonthlyData(activeDeals);
   const cumulativeData = buildCumulativeData(monthlyData);
-  const funnelData = buildFunnelData(deals);
+  const funnelData = buildFunnelData(activeDeals);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
