@@ -31,6 +31,7 @@ function normalizeDeals(rows) {
     created_at: (row['"Deal stage" Changed At'] || '').split('T')[0],
     close_date: '',
     currency:   'MXN',
+    archived:   false,
   }));
 }
 
@@ -227,6 +228,26 @@ export function useData() {
     });
   }, [pushActivity]);
 
+  const archiveDeal = useCallback((id, archive = true) => {
+    setDeals(prev => {
+      const old = prev.find(d => String(d.id) === String(id));
+      const updated = prev.map(d => String(d.id) === String(id) ? { ...d, archived: archive } : d);
+      persist(SK.deals, updated);
+      if (old) {
+        pushActivity({
+          id:          `act-${Date.now()}`,
+          deal_id:     id,
+          actor:       old.owner || 'Frida Ruh',
+          type:        archive ? 'archived' : 'unarchived',
+          description: archive ? 'archivó este deal' : 'desarchivó este deal',
+          changes:     [],
+          created_at:  new Date().toISOString(),
+        });
+      }
+      return updated;
+    });
+  }, [pushActivity]);
+
   const moveDeal = useCallback((dealId, newStage) => {
     setDeals(prev => {
       const old = prev.find(d => String(d.id) === String(dealId));
@@ -394,7 +415,7 @@ export function useData() {
 
   return {
     deals, contacts, companies, activities, tasks, notes, loading,
-    addDeal, updateDeal, moveDeal, deleteDeal,
+    addDeal, updateDeal, moveDeal, deleteDeal, archiveDeal,
     addContact, updateContact,
     addCompany, updateCompany,
     addTask, toggleTask, deleteTask,

@@ -27,7 +27,7 @@ export default function App() {
 
   const {
     deals, contacts, companies, activities, tasks, notes, loading,
-    moveDeal, addDeal, updateDeal, addContact, updateContact, addCompany, updateCompany,
+    moveDeal, addDeal, updateDeal, archiveDeal, addContact, updateContact, addCompany, updateCompany,
     addTask, toggleTask, deleteTask, addNote, deleteNote,
     getCompany, getContact,
   } = useData();
@@ -80,6 +80,7 @@ export default function App() {
             tasks={tasks}
             notes={notes}
             updateDeal={updateDeal}
+            archiveDeal={archiveDeal}
             addTask={addTask}
             toggleTask={toggleTask}
             deleteTask={deleteTask}
@@ -95,6 +96,7 @@ export default function App() {
             onMoveDeal={moveDeal}
             onAddDeal={openAddDeal}
             onSelectDeal={(deal) => setSelectedDealId(deal.id)}
+            onArchiveDeal={archiveDeal}
           />
         )}
 

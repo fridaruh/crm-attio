@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   ArrowLeft, ChevronRight, Mail, List, Copy, Link2,
-  Plus, Check, Trash2, X, Calendar, Users,
+  Plus, Check, Trash2, X, Calendar, Users, Archive, ArchiveRestore,
 } from 'lucide-react';
 import Avatar, { getColor } from '../shared/Avatar';
 import { STAGE_CONFIG, formatCurrency } from './DealCard';
@@ -20,10 +20,10 @@ function relativeTime(isoStr) {
 }
 
 // ── TopBar ────────────────────────────────────────────────────────────────────
-function TopBar({ deal, deals, onBack }) {
-  const stageDeals = deals.filter(d => d.stage === deal.stage);
+function TopBar({ deal, deals, onBack, onArchive }) {
+  const stageDeals = deals.filter(d => d.stage === deal.stage && !d.archived);
   const idx = stageDeals.findIndex(d => String(d.id) === String(deal.id));
-  const counter = idx >= 0 ? `${idx + 1} of ${stageDeals.length} in ${deal.stage}` : '';
+  const counter = !deal.archived && idx >= 0 ? `${idx + 1} of ${stageDeals.length} in ${deal.stage}` : '';
 
   return (
     <div style={{
@@ -47,6 +47,39 @@ function TopBar({ deal, deals, onBack }) {
         <span style={{ fontSize: 12, color: 'var(--text-muted)', flexShrink: 0 }}>
           {counter}
         </span>
+      )}
+      {deal.archived ? (
+        <button
+          onClick={() => onArchive(deal.id, false)}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 5,
+            fontSize: 12, fontWeight: 500, padding: '5px 12px',
+            borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
+            color: 'var(--text-secondary)', background: 'var(--bg-secondary)',
+            flexShrink: 0,
+          }}
+          onMouseEnter={e => e.currentTarget.style.background = 'var(--border)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'var(--bg-secondary)'}
+        >
+          <ArchiveRestore size={13} />
+          Unarchive
+        </button>
+      ) : (
+        <button
+          onClick={() => onArchive(deal.id, true)}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 5,
+            fontSize: 12, fontWeight: 500, padding: '5px 12px',
+            borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
+            color: 'var(--text-muted)', background: 'transparent',
+            flexShrink: 0,
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-secondary)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)'; }}
+        >
+          <Archive size={13} />
+          Archive
+        </button>
       )}
     </div>
   );
@@ -787,7 +820,7 @@ function PeopleTab({ deal, contacts, companies, updateDeal }) {
 export default function DealDetailPage({
   dealId, deals, contacts, companies,
   activities, tasks, notes,
-  updateDeal, addTask, toggleTask, deleteTask, addNote, deleteNote,
+  updateDeal, archiveDeal, addTask, toggleTask, deleteTask, addNote, deleteNote,
   onBack,
 }) {
   const [activeTab, setActiveTab] = useState('overview');
@@ -816,7 +849,19 @@ export default function DealDetailPage({
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: 'var(--bg)' }}>
-      <TopBar deal={deal} deals={deals} onBack={onBack} />
+      <TopBar deal={deal} deals={deals} onBack={onBack} onArchive={archiveDeal} />
+
+      {deal.archived && (
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 8,
+          padding: '8px 20px',
+          background: '#FFFBEB', borderBottom: '1px solid #FDE68A',
+          fontSize: 12.5, color: '#92400E', flexShrink: 0,
+        }}>
+          <Archive size={13} />
+          This deal is archived and won't appear in the active pipeline.
+        </div>
+      )}
 
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         <LeftPanel
