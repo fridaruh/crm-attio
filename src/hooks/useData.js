@@ -374,7 +374,7 @@ export function useData() {
 
   // ── Tasks ─────────────────────────────────────────────────────────────────
   const addTask = useCallback((task) => {
-    const newTask = { ...task, id: `task-${Date.now()}`, completed: false, created_at: new Date().toISOString() };
+    const newTask = { ...task, id: `task-${Date.now()}`, completed: false, status: 'todo', created_at: new Date().toISOString() };
     setDoc(doc(db, 'tasks', newTask.id), clean(newTask)).catch(console.error);
     setTasks(prev => [newTask, ...prev]);
     if (task.deal_id) {
@@ -392,8 +392,21 @@ export function useData() {
 
   const toggleTask = useCallback((taskId) => {
     setTasks(prev => {
+      const updated = prev.map(t => {
+        if (String(t.id) !== String(taskId)) return t;
+        const completed = !t.completed;
+        return { ...t, completed, status: completed ? 'done' : 'todo' };
+      });
+      const merged = updated.find(t => String(t.id) === String(taskId));
+      if (merged) setDoc(doc(db, 'tasks', String(taskId)), clean(merged)).catch(console.error);
+      return updated;
+    });
+  }, []);
+
+  const updateTask = useCallback((taskId, changes) => {
+    setTasks(prev => {
       const updated = prev.map(t =>
-        String(t.id) === String(taskId) ? { ...t, completed: !t.completed } : t
+        String(t.id) === String(taskId) ? { ...t, ...changes } : t
       );
       const merged = updated.find(t => String(t.id) === String(taskId));
       if (merged) setDoc(doc(db, 'tasks', String(taskId)), clean(merged)).catch(console.error);
@@ -456,7 +469,7 @@ export function useData() {
     addDeal, updateDeal, moveDeal, deleteDeal, archiveDeal,
     addContact, updateContact,
     addCompany, updateCompany,
-    addTask, toggleTask, deleteTask,
+    addTask, toggleTask, updateTask, deleteTask,
     addNote, deleteNote,
     getCompany, getContact,
     resetData,

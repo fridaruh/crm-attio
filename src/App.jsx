@@ -37,7 +37,7 @@ export default function App() {
   const {
     deals, contacts, companies, activities, tasks, notes, loading,
     moveDeal, addDeal, updateDeal, archiveDeal, addContact, updateContact, addCompany, updateCompany,
-    addTask, toggleTask, deleteTask, addNote, deleteNote,
+    addTask, toggleTask, updateTask, deleteTask, addNote, deleteNote,
     getCompany, getContact,
   } = useData();
 
@@ -150,6 +150,7 @@ export default function App() {
             deals={deals}
             onAddTask={addTask}
             onToggleTask={toggleTask}
+            onUpdateTask={updateTask}
             onDeleteTask={deleteTask}
           />
         )}
