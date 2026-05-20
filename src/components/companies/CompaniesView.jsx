@@ -291,13 +291,13 @@ export default function CompaniesView({ companies, contacts, deals, onSelectComp
           </div>
         </div>
         <div className="view-header-right">
-          <div className="search-input">
+          <div className="search-input hide-mobile">
             <Search size={13} color="var(--text-muted)" />
             <input placeholder="Search companies…" value={search} onChange={e => setSearch(e.target.value)} />
           </div>
 
           {/* Filter button */}
-          <div style={{ position: 'relative' }}>
+          <div style={{ position: 'relative' }} className="hide-mobile">
             <button
               ref={filterBtnRef}
               className="btn-secondary"
@@ -329,6 +329,14 @@ export default function CompaniesView({ companies, contacts, deals, onSelectComp
             <Plus size={14} />
             New company
           </button>
+        </div>
+      </div>
+
+      {/* Mobile search */}
+      <div style={{ padding: '8px 16px', borderBottom: '1px solid var(--border)', display: 'none' }} className="mobile-search-bar">
+        <div className="search-input" style={{ width: '100%' }}>
+          <Search size={13} color="var(--text-muted)" />
+          <input placeholder="Search companies…" value={search} onChange={e => setSearch(e.target.value)} />
         </div>
       </div>
 

@@ -20,7 +20,7 @@ export default function KanbanBoard({ deals, getCompany, tasks, notes, onMoveDea
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <div style={{
+      <div className="kanban-board" style={{
         display: 'flex',
         gap: 0,
         padding: '20px 24px',
@@ -36,6 +36,7 @@ export default function KanbanBoard({ deals, getCompany, tasks, notes, onMoveDea
 
           return (
             <div
+              className="kanban-column"
               key={stageId}
               style={{
                 width: 268,

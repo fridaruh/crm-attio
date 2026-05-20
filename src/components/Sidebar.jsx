@@ -34,7 +34,8 @@ export default function Sidebar({ currentView, onNavigate, onLogout }) {
   const color = workspaceColor(workspace);
 
   return (
-    <aside style={{
+    <>
+    <aside className="app-sidebar" style={{
       width: 'var(--sidebar-width)',
       background: 'var(--sidebar-bg)',
       display: 'flex',
@@ -177,6 +178,35 @@ export default function Sidebar({ currentView, onNavigate, onLogout }) {
         </button>
       </div>
     </aside>
+
+    {/* Mobile bottom nav */}
+    <nav className="mobile-nav">
+      {[
+        { id: 'deals',     label: 'Deals',     icon: TrendingUp },
+        { id: 'contacts',  label: 'People',    icon: Users },
+        { id: 'companies', label: 'Companies', icon: Building2 },
+        { id: 'tasks',     label: 'Tasks',     icon: CheckSquare },
+      ].map(({ id, label, icon: Icon }) => {
+        const active = currentView === id;
+        return (
+          <button
+            key={id}
+            onClick={() => onNavigate(id)}
+            style={{
+              flex: 1, display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center', gap: 3,
+              background: 'none', border: 'none', cursor: 'pointer',
+              color: active ? 'var(--purple)' : 'var(--sidebar-text)',
+              paddingBottom: 4,
+            }}
+          >
+            <Icon size={20} strokeWidth={active ? 2 : 1.75} />
+            <span style={{ fontSize: 10, fontWeight: active ? 600 : 400 }}>{label}</span>
+          </button>
+        );
+      })}
+    </nav>
+    </>
   );
 }
 

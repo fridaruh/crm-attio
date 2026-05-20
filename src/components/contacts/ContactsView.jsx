@@ -86,11 +86,11 @@ export default function ContactsView({ contacts, companies, onSelectContact, onA
         </div>
 
         <div className="view-header-right">
-          <div className="search-input">
+          <div className="search-input hide-mobile">
             <Search size={13} color="var(--text-muted)" />
             <input placeholder="Search people…" value={search} onChange={e => setSearch(e.target.value)} />
           </div>
-          <button className="btn-secondary">
+          <button className="btn-secondary hide-mobile">
             <SlidersHorizontal size={13} />
             Filter
           </button>
@@ -101,15 +101,23 @@ export default function ContactsView({ contacts, companies, onSelectContact, onA
         </div>
       </div>
 
+      {/* Mobile search */}
+      <div style={{ padding: '8px 16px', borderBottom: '1px solid var(--border)', display: 'none' }} className="mobile-search-bar">
+        <div className="search-input" style={{ width: '100%' }}>
+          <Search size={13} color="var(--text-muted)" />
+          <input placeholder="Search people…" value={search} onChange={e => setSearch(e.target.value)} />
+        </div>
+      </div>
+
       {/* Table */}
       <div className="view-content" style={{ overflowY: 'auto' }}>
         <table className="data-table">
           <thead>
             <tr>
               <SortTh label="Name"         colKey="name"                style={{ minWidth: 200 }} {...thProps} />
-              <SortTh label="Connection"   colKey="connection_strength" style={{ minWidth: 130 }} {...thProps} />
-              <SortTh label="Last email"   colKey="last_email"          style={{ minWidth: 120 }} {...thProps} />
-              <SortTh label="Last meeting" colKey="last_calendar"       style={{ minWidth: 120 }} {...thProps} />
+              <SortTh label="Connection"   colKey="connection_strength" style={{ minWidth: 130 }} {...thProps} className="hide-mobile" />
+              <SortTh label="Last email"   colKey="last_email"          style={{ minWidth: 120 }} {...thProps} className="hide-mobile" />
+              <SortTh label="Last meeting" colKey="last_calendar"       style={{ minWidth: 120 }} {...thProps} className="hide-mobile" />
             </tr>
           </thead>
           <tbody>
@@ -120,12 +128,20 @@ export default function ContactsView({ contacts, companies, onSelectContact, onA
                   <td style={{ maxWidth: 260 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <Avatar name={contact.name} />
-                      <span style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {contact.name}
-                      </span>
+                      <div style={{ overflow: 'hidden' }}>
+                        <div style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {contact.name}
+                        </div>
+                        {strength && (
+                          <div className="show-mobile" style={{ display: 'none', alignItems: 'center', gap: 4, marginTop: 2 }}>
+                            <div style={{ width: 6, height: 6, borderRadius: '50%', background: strength.color }} />
+                            <span style={{ fontSize: 11.5, color: 'var(--text-muted)' }}>{strength.label}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </td>
-                  <td>
+                  <td className="hide-mobile">
                     {strength ? (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                         <div style={{ width: 7, height: 7, borderRadius: '50%', background: strength.color, flexShrink: 0 }} />
@@ -133,8 +149,8 @@ export default function ContactsView({ contacts, companies, onSelectContact, onA
                       </div>
                     ) : '—'}
                   </td>
-                  <td style={{ color: 'var(--text-secondary)', fontSize: 12.5 }}>{formatDate(contact.last_email)}</td>
-                  <td style={{ color: 'var(--text-secondary)', fontSize: 12.5 }}>{formatDate(contact.last_calendar)}</td>
+                  <td className="hide-mobile" style={{ color: 'var(--text-secondary)', fontSize: 12.5 }}>{formatDate(contact.last_email)}</td>
+                  <td className="hide-mobile" style={{ color: 'var(--text-secondary)', fontSize: 12.5 }}>{formatDate(contact.last_calendar)}</td>
                 </tr>
               );
             })}

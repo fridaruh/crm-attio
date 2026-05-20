@@ -81,7 +81,7 @@ export default function DealsView({
         </div>
 
         <div className="view-header-right">
-          <div className="search-input">
+          <div className="search-input hide-mobile">
             <Search size={13} color="var(--text-muted)" />
             <input
               placeholder={showArchived ? 'Search archived…' : 'Search deals…'}
@@ -91,7 +91,7 @@ export default function DealsView({
           </div>
           {!showArchived && (
             <>
-              <button className="btn-secondary">
+              <button className="btn-secondary hide-mobile">
                 <SlidersHorizontal size={13} />
                 Filter
               </button>
@@ -101,6 +101,18 @@ export default function DealsView({
               </button>
             </>
           )}
+        </div>
+      </div>
+
+      {/* Mobile search bar */}
+      <div style={{ padding: '8px 16px', borderBottom: '1px solid var(--border)', display: 'none' }} className="mobile-search-bar">
+        <div className="search-input" style={{ width: '100%' }}>
+          <Search size={13} color="var(--text-muted)" />
+          <input
+            placeholder="Search deals…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
         </div>
       </div>
 
