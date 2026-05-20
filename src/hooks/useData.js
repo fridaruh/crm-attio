@@ -1,15 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Papa from 'papaparse';
 import { resolveCompanyFromEmail } from '../utils/linking';
-
-const SK = {
-  deals:      'attio-deals-v2',
-  contacts:   'attio-contacts-v2',
-  companies:  'attio-companies-v3',
-  activities: 'attio-activities-v2',
-  tasks:      'attio-tasks-v2',
-  notes:      'attio-notes-v2',
-};
+import { db } from '../firebase';
+import { collection, getDocs, setDoc, deleteDoc, doc, writeBatch } from 'firebase/firestore';
 
 async function loadCSV(path) {
   const res = await fetch(path);
@@ -81,8 +74,26 @@ function generateInitialActivities(deals) {
   }));
 }
 
-function persist(key, data) {
-  try { localStorage.setItem(key, JSON.stringify(data)); } catch {}
+// Strips undefined values so Firestore doesn't reject them
+function clean(obj) {
+  return Object.fromEntries(
+    Object.entries(obj).map(([k, v]) => [k, v === undefined ? null : v])
+  );
+}
+
+async function loadCollection(colName) {
+  const snap = await getDocs(collection(db, colName));
+  return snap.docs.map(d => d.data());
+}
+
+async function seedCollection(colName, items) {
+  for (let i = 0; i < items.length; i += 400) {
+    const batch = writeBatch(db);
+    items.slice(i, i + 400).forEach(item => {
+      batch.set(doc(db, colName, String(item.id)), clean(item));
+    });
+    await batch.commit();
+  }
 }
 
 const FIELD_LABELS = {
@@ -112,55 +123,91 @@ export function useData() {
   const [notes,      setNotes]      = useState([]);
   const [loading,    setLoading]    = useState(true);
 
-  // Refs so callbacks always see current state without stale closures
-  const companiesRef  = useRef([]);
-  const dealsRef      = useRef([]);
+  const companiesRef = useRef([]);
+  const dealsRef     = useRef([]);
   useEffect(() => { companiesRef.current = companies; }, [companies]);
   useEffect(() => { dealsRef.current = deals; }, [deals]);
 
   useEffect(() => {
     async function init() {
       try {
-        const [rawDeals, rawContacts, rawCompanies, enrichment] = await Promise.all([
-          localStorage.getItem(SK.deals)
-            ? JSON.parse(localStorage.getItem(SK.deals))
-            : loadCSV('/data/imported_data/Deals - Pipeline.csv').then(normalizeDeals),
-          localStorage.getItem(SK.contacts)
-            ? JSON.parse(localStorage.getItem(SK.contacts))
-            : loadCSV('/data/imported_data/People - Recently Contacted People.csv').then(normalizeContacts),
-          localStorage.getItem(SK.companies)
-            ? JSON.parse(localStorage.getItem(SK.companies))
-            : loadCSV('/data/imported_data/Companies - All Companies.csv').then(normalizeCompanies),
-          fetch('/data/company_enrichment.json').then(r => r.json()).catch(() => ({})),
+        const [fsDeals, fsContacts, fsCompanies, fsActivities, fsTasks, fsNotes] = await Promise.all([
+          loadCollection('deals'),
+          loadCollection('contacts'),
+          loadCollection('companies'),
+          loadCollection('activities'),
+          loadCollection('tasks'),
+          loadCollection('notes'),
         ]);
 
-        // Merge pre-built enrichment by domain (never overwrites manual edits already marked _enriched)
-        const mergedCompanies = rawCompanies.map(c => {
-          if (c._enriched || !c.domain) return c;
-          const data = enrichment[c.domain];
-          return data ? { ...c, ...data } : c;
-        });
+        if (fsDeals.length === 0) {
+          // First run: prefer localStorage (existing user data) over CSVs
+          const LS = {
+            deals:      'attio-deals-v2',
+            contacts:   'attio-contacts-v2',
+            companies:  'attio-companies-v3',
+            activities: 'attio-activities-v2',
+            tasks:      'attio-tasks-v2',
+            notes:      'attio-notes-v2',
+          };
+          const lsDeals = localStorage.getItem(LS.deals);
 
-        const rawActivities = localStorage.getItem(SK.activities)
-          ? JSON.parse(localStorage.getItem(SK.activities))
-          : generateInitialActivities(rawDeals);
+          let rawDeals, rawContacts, rawCompanies, initialActivities, rawTasks, rawNotes;
 
-        const rawTasks = localStorage.getItem(SK.tasks)
-          ? JSON.parse(localStorage.getItem(SK.tasks))
-          : [];
+          if (lsDeals) {
+            // Migrate from localStorage
+            rawDeals      = JSON.parse(localStorage.getItem(LS.deals)      || '[]');
+            rawContacts   = JSON.parse(localStorage.getItem(LS.contacts)   || '[]');
+            rawCompanies  = JSON.parse(localStorage.getItem(LS.companies)  || '[]');
+            initialActivities = JSON.parse(localStorage.getItem(LS.activities) || '[]');
+            rawTasks      = JSON.parse(localStorage.getItem(LS.tasks)      || '[]');
+            rawNotes      = JSON.parse(localStorage.getItem(LS.notes)      || '[]');
+          } else {
+            // Fresh install: seed from CSVs
+            const [csvDeals, csvContacts, csvCompanies, enrichment] = await Promise.all([
+              loadCSV('/data/imported_data/Deals - Pipeline.csv').then(normalizeDeals),
+              loadCSV('/data/imported_data/People - Recently Contacted People.csv').then(normalizeContacts),
+              loadCSV('/data/imported_data/Companies - All Companies.csv').then(normalizeCompanies),
+              fetch('/data/company_enrichment.json').then(r => r.json()).catch(() => ({})),
+            ]);
+            rawDeals     = csvDeals;
+            rawContacts  = csvContacts;
+            rawCompanies = csvCompanies.map(c => {
+              if (c._enriched || !c.domain) return c;
+              const data = enrichment[c.domain];
+              return data ? { ...c, ...data } : c;
+            });
+            initialActivities = generateInitialActivities(rawDeals);
+            rawTasks = [];
+            rawNotes = [];
+          }
 
-        const rawNotes = localStorage.getItem(SK.notes)
-          ? JSON.parse(localStorage.getItem(SK.notes))
-          : [];
+          await Promise.all([
+            seedCollection('deals', rawDeals),
+            seedCollection('contacts', rawContacts),
+            seedCollection('companies', rawCompanies),
+            seedCollection('activities', initialActivities),
+            seedCollection('tasks', rawTasks),
+            seedCollection('notes', rawNotes),
+          ]);
 
-        setDeals(rawDeals);
-        setContacts(rawContacts);
-        setCompanies(mergedCompanies);
-        setActivities(rawActivities);
-        setTasks(rawTasks);
-        setNotes(rawNotes);
+          // Clear localStorage after successful migration
+          Object.values(LS).forEach(k => localStorage.removeItem(k));
 
-        if (!localStorage.getItem(SK.activities)) persist(SK.activities, rawActivities);
+          setDeals(rawDeals);
+          setContacts(rawContacts);
+          setCompanies(rawCompanies);
+          setActivities(initialActivities);
+          setTasks(rawTasks);
+          setNotes(rawNotes);
+        } else {
+          setDeals(fsDeals);
+          setContacts(fsContacts);
+          setCompanies(fsCompanies);
+          setActivities(fsActivities);
+          setTasks(fsTasks);
+          setNotes(fsNotes);
+        }
       } catch (err) {
         console.error('Failed to load data:', err);
       } finally {
@@ -172,11 +219,8 @@ export function useData() {
 
   // ── internal activity logger ──────────────────────────────────────────────
   const pushActivity = useCallback((entry) => {
-    setActivities(prev => {
-      const updated = [entry, ...prev];
-      persist(SK.activities, updated);
-      return updated;
-    });
+    setDoc(doc(db, 'activities', entry.id), clean(entry)).catch(console.error);
+    setActivities(prev => [entry, ...prev]);
   }, []);
 
   // ── Deals ─────────────────────────────────────────────────────────────────
@@ -188,11 +232,8 @@ export function useData() {
       date:       new Date().toISOString(),
       currency:   'MXN',
     };
-    setDeals(prev => {
-      const updated = [newDeal, ...prev];
-      persist(SK.deals, updated);
-      return updated;
-    });
+    setDoc(doc(db, 'deals', newDeal.id), clean(newDeal)).catch(console.error);
+    setDeals(prev => [newDeal, ...prev]);
     pushActivity({
       id: `act-${Date.now()}`, deal_id: newDeal.id,
       actor: newDeal.owner || 'Frida Ruh', type: 'created',
@@ -205,7 +246,8 @@ export function useData() {
     setDeals(prev => {
       const old = prev.find(d => String(d.id) === String(id));
       const updated = prev.map(d => String(d.id) === String(id) ? { ...d, ...changes } : d);
-      persist(SK.deals, updated);
+      const merged  = updated.find(d => String(d.id) === String(id));
+      if (merged) setDoc(doc(db, 'deals', String(id)), clean(merged)).catch(console.error);
 
       if (old) {
         const changedFields = Object.keys(changes).filter(k =>
@@ -230,9 +272,10 @@ export function useData() {
 
   const archiveDeal = useCallback((id, archive = true) => {
     setDeals(prev => {
-      const old = prev.find(d => String(d.id) === String(id));
+      const old     = prev.find(d => String(d.id) === String(id));
       const updated = prev.map(d => String(d.id) === String(id) ? { ...d, archived: archive } : d);
-      persist(SK.deals, updated);
+      const merged  = updated.find(d => String(d.id) === String(id));
+      if (merged) setDoc(doc(db, 'deals', String(id)), clean(merged)).catch(console.error);
       if (old) {
         pushActivity({
           id:          `act-${Date.now()}`,
@@ -250,11 +293,10 @@ export function useData() {
 
   const moveDeal = useCallback((dealId, newStage) => {
     setDeals(prev => {
-      const old = prev.find(d => String(d.id) === String(dealId));
-      const updated = prev.map(d =>
-        String(d.id) === String(dealId) ? { ...d, stage: newStage } : d
-      );
-      persist(SK.deals, updated);
+      const old     = prev.find(d => String(d.id) === String(dealId));
+      const updated = prev.map(d => String(d.id) === String(dealId) ? { ...d, stage: newStage } : d);
+      const merged  = updated.find(d => String(d.id) === String(dealId));
+      if (merged) setDoc(doc(db, 'deals', String(dealId)), clean(merged)).catch(console.error);
       if (old && old.stage !== newStage) {
         pushActivity({
           id:          `act-${Date.now()}`,
@@ -271,11 +313,8 @@ export function useData() {
   }, [pushActivity]);
 
   const deleteDeal = useCallback((id) => {
-    setDeals(prev => {
-      const updated = prev.filter(d => String(d.id) !== String(id));
-      persist(SK.deals, updated);
-      return updated;
-    });
+    deleteDoc(doc(db, 'deals', String(id))).catch(console.error);
+    setDeals(prev => prev.filter(d => String(d.id) !== String(id)));
   }, []);
 
   // ── Contacts ──────────────────────────────────────────────────────────────
@@ -290,11 +329,8 @@ export function useData() {
       last_calendar:       '',
       created_at:          new Date().toISOString().split('T')[0],
     };
-    setContacts(prev => {
-      const updated = [newContact, ...prev];
-      persist(SK.contacts, updated);
-      return updated;
-    });
+    setDoc(doc(db, 'contacts', newContact.id), clean(newContact)).catch(console.error);
+    setContacts(prev => [newContact, ...prev]);
   }, []);
 
   const updateContact = useCallback((id, changes) => {
@@ -308,25 +344,30 @@ export function useData() {
         }
         return next;
       });
-      persist(SK.contacts, updated);
+      const merged = updated.find(c => String(c.id) === String(id));
+      if (merged) setDoc(doc(db, 'contacts', String(id)), clean(merged)).catch(console.error);
       return updated;
     });
   }, []);
 
   // ── Companies ─────────────────────────────────────────────────────────────
   const addCompany = useCallback((company) => {
-    setCompanies(prev => {
-      const n = { ...company, id: `company-${Date.now()}`, created_at: new Date().toISOString().split('T')[0], connection_strength: '', last_interaction: '' };
-      const updated = [n, ...prev];
-      persist(SK.companies, updated);
-      return updated;
-    });
+    const newCompany = {
+      ...company,
+      id:                  `company-${Date.now()}`,
+      created_at:          new Date().toISOString().split('T')[0],
+      connection_strength: '',
+      last_interaction:    '',
+    };
+    setDoc(doc(db, 'companies', newCompany.id), clean(newCompany)).catch(console.error);
+    setCompanies(prev => [newCompany, ...prev]);
   }, []);
 
   const updateCompany = useCallback((id, changes) => {
     setCompanies(prev => {
       const updated = prev.map(c => String(c.id) === String(id) ? { ...c, ...changes } : c);
-      persist(SK.companies, updated);
+      const merged  = updated.find(c => String(c.id) === String(id));
+      if (merged) setDoc(doc(db, 'companies', String(id)), clean(merged)).catch(console.error);
       return updated;
     });
   }, []);
@@ -334,11 +375,8 @@ export function useData() {
   // ── Tasks ─────────────────────────────────────────────────────────────────
   const addTask = useCallback((task) => {
     const newTask = { ...task, id: `task-${Date.now()}`, completed: false, created_at: new Date().toISOString() };
-    setTasks(prev => {
-      const updated = [newTask, ...prev];
-      persist(SK.tasks, updated);
-      return updated;
-    });
+    setDoc(doc(db, 'tasks', newTask.id), clean(newTask)).catch(console.error);
+    setTasks(prev => [newTask, ...prev]);
     if (task.deal_id) {
       pushActivity({
         id:          `act-${Date.now()}`,
@@ -357,27 +395,22 @@ export function useData() {
       const updated = prev.map(t =>
         String(t.id) === String(taskId) ? { ...t, completed: !t.completed } : t
       );
-      persist(SK.tasks, updated);
+      const merged = updated.find(t => String(t.id) === String(taskId));
+      if (merged) setDoc(doc(db, 'tasks', String(taskId)), clean(merged)).catch(console.error);
       return updated;
     });
   }, []);
 
   const deleteTask = useCallback((taskId) => {
-    setTasks(prev => {
-      const updated = prev.filter(t => String(t.id) !== String(taskId));
-      persist(SK.tasks, updated);
-      return updated;
-    });
+    deleteDoc(doc(db, 'tasks', String(taskId))).catch(console.error);
+    setTasks(prev => prev.filter(t => String(t.id) !== String(taskId)));
   }, []);
 
   // ── Notes ─────────────────────────────────────────────────────────────────
   const addNote = useCallback((note) => {
     const newNote = { ...note, id: `note-${Date.now()}`, created_at: new Date().toISOString() };
-    setNotes(prev => {
-      const updated = [newNote, ...prev];
-      persist(SK.notes, updated);
-      return updated;
-    });
+    setDoc(doc(db, 'notes', newNote.id), clean(newNote)).catch(console.error);
+    setNotes(prev => [newNote, ...prev]);
     if (note.deal_id) {
       pushActivity({
         id:          `act-${Date.now()}`,
@@ -392,11 +425,8 @@ export function useData() {
   }, [pushActivity]);
 
   const deleteNote = useCallback((noteId) => {
-    setNotes(prev => {
-      const updated = prev.filter(n => String(n.id) !== String(noteId));
-      persist(SK.notes, updated);
-      return updated;
-    });
+    deleteDoc(doc(db, 'notes', String(noteId))).catch(console.error);
+    setNotes(prev => prev.filter(n => String(n.id) !== String(noteId)));
   }, []);
 
   // ── Lookups ───────────────────────────────────────────────────────────────
@@ -409,7 +439,15 @@ export function useData() {
   [contacts]);
 
   const resetData = useCallback(async () => {
-    Object.values(SK).forEach(k => localStorage.removeItem(k));
+    const colNames = ['deals', 'contacts', 'companies', 'activities', 'tasks', 'notes'];
+    for (const colName of colNames) {
+      const snap = await getDocs(collection(db, colName));
+      for (let i = 0; i < snap.docs.length; i += 400) {
+        const batch = writeBatch(db);
+        snap.docs.slice(i, i + 400).forEach(d => batch.delete(d.ref));
+        await batch.commit();
+      }
+    }
     window.location.reload();
   }, []);
 

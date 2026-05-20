@@ -1,7 +1,7 @@
 import {
   Home, Users, Building2, TrendingUp, CheckSquare,
   BarChart2, Zap, Settings, Search, Bell, ChevronDown,
-  LineChart,
+  LineChart, LogOut,
 } from 'lucide-react';
 
 const AVATAR_COLORS = ['#7C5CFC', '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4'];
@@ -29,7 +29,7 @@ const bottomItems = [
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
-export default function Sidebar({ currentView, onNavigate }) {
+export default function Sidebar({ currentView, onNavigate, onLogout }) {
   const workspace = 'Frida Ruh';
   const color = workspaceColor(workspace);
 
@@ -162,6 +162,19 @@ export default function Sidebar({ currentView, onNavigate }) {
             onClick={() => onNavigate(item.id)}
           />
         ))}
+        <button
+          onClick={onLogout}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8, width: '100%',
+            padding: '6px 8px', borderRadius: 'var(--radius-sm)',
+            background: 'transparent', transition: 'background var(--transition)', marginTop: 4,
+          }}
+          onMouseEnter={e => e.currentTarget.style.background = 'var(--sidebar-item-hover)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+        >
+          <LogOut size={15} color="var(--sidebar-text)" strokeWidth={1.75} />
+          <span style={{ fontSize: 13, color: 'var(--sidebar-text)' }}>Sign out</span>
+        </button>
       </div>
     </aside>
   );

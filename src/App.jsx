@@ -1,5 +1,8 @@
-import { useState } from 'react';
-import { Home, CheckSquare, Zap, Settings, Bell } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Home, CheckSquare, Zap, Settings, Bell, LogOut } from 'lucide-react';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { auth } from './firebase';
+import Login from './components/Login';
 import Sidebar from './components/Sidebar';
 import DealsView from './components/deals/DealsView';
 import DealDetailPage from './components/deals/DealDetailPage';
@@ -14,7 +17,13 @@ import IncomeReport from './components/reports/IncomeReport';
 import TasksView from './components/tasks/TasksView';
 import { useData } from './hooks/useData';
 
+const ALLOWED_EMAIL = 'i.am@fridaruh.com';
+
 export default function App() {
+  // Auth state — must be declared before any conditional return
+  const [authUser, setAuthUser] = useState(undefined); // undefined = checking, null = not allowed
+
+  // All hooks must be declared unconditionally at the top
   const [view, setView] = useState('deals');
   const [selectedDealId, setSelectedDealId]       = useState(null);
   const [selectedContactId, setSelectedContactId] = useState(null);
@@ -32,6 +41,17 @@ export default function App() {
     getCompany, getContact,
   } = useData();
 
+  useEffect(() => {
+    return onAuthStateChanged(auth, (user) => {
+      setAuthUser(user?.email === ALLOWED_EMAIL ? user : null);
+    });
+  }, []);
+
+  // Conditionals come after all hooks
+  if (authUser === undefined) return <LoadingScreen />;
+  if (!authUser) return <Login allowedEmail={ALLOWED_EMAIL} />;
+  if (loading) return <LoadingScreen />;
+
   function openRecord(record, type) {
     setSelectedRecord(record);
     setSelectedType(type);
@@ -47,27 +67,9 @@ export default function App() {
     setShowAddDeal(true);
   }
 
-  if (loading) {
-    return (
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        height: '100vh', background: '#0F0F0F',
-      }}>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
-          <div style={{
-            width: 32, height: 32, borderRadius: 8, background: '#7C5CFC',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 18, fontWeight: 800, color: 'white',
-          }}>A</div>
-          <span style={{ color: '#555', fontSize: 13 }}>Cargando datos…</span>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="app-layout">
-      <Sidebar currentView={view} onNavigate={setView} />
+      <Sidebar currentView={view} onNavigate={setView} onLogout={() => signOut(auth)} />
 
       <main className="main-content">
         {view === 'deals' && selectedDealId ? (
@@ -194,6 +196,24 @@ export default function App() {
           onClose={() => setShowAddCompany(false)}
         />
       )}
+    </div>
+  );
+}
+
+function LoadingScreen() {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      height: '100vh', background: '#0F0F0F',
+    }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+        <div style={{
+          width: 32, height: 32, borderRadius: 8, background: '#7C5CFC',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 18, fontWeight: 800, color: 'white',
+        }}>A</div>
+        <span style={{ color: '#555', fontSize: 13 }}>Cargando datos…</span>
+      </div>
     </div>
   );
 }
