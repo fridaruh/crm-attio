@@ -1,14 +1,19 @@
 # CRM Attio Clone
 
-A pixel-faithful clone of [Attio](https://attio.com) CRM built with React 19 + Vite. Includes kanban deal management, contact and company records, a full task manager, and an income report — all persisted locally via CSV imports and `localStorage`.
+A pixel-faithful clone of [Attio](https://attio.com) CRM built with React 19 + Vite. Includes kanban deal management, contact and company records, a full task manager, and an income report — all persisted in Firestore with Google Auth.
 
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-Firestore-FFCA28?logo=firebase&logoColor=black)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ---
 
 ## Features
+
+### Authentication
+- Google Sign-In via Firebase Auth
+- Protected routes — all views require authentication
 
 ### Deals — Kanban Board
 - Drag-and-drop cards across pipeline stages (Lead → Closed Won/Lost)
@@ -32,10 +37,14 @@ A pixel-faithful clone of [Attio](https://attio.com) CRM built with React 19 + V
 
 ### Tasks
 - Global task manager accessible from the sidebar
-- Grouped sections: Overdue · Today · Upcoming · No due date · Completed (collapsible)
-- Create task modal: due date picker, assignee, link to any deal / contact / company
-- "Create more" toggle for rapid task entry
+- **Board view**: drag-and-drop kanban with three columns — To Do · In Progress · Done
+- **List view**: compact table with status badges, linked record, and due date
+- Click any task to open a full **edit modal** with all fields editable:
+  - Title, Status, Due date, Linked record (deal / contact / company)
+  - Additional notes textarea persisted to Firestore
+- Create task modal: due date picker, link to any deal / contact / company, "Create more" toggle
 - Keyboard shortcuts: `ESC` to cancel, `⌘↵` to save
+- Filter tasks by linked project
 - Tasks also appear inside deal and contact detail pages
 
 ### Income Report
@@ -50,36 +59,51 @@ A pixel-faithful clone of [Attio](https://attio.com) CRM built with React 19 + V
 |---|---|
 | React 19 | UI framework |
 | Vite 8 | Build tool & dev server |
+| Firebase | Auth (Google Sign-In) + Firestore persistence |
 | `@hello-pangea/dnd` | Drag-and-drop kanban |
 | `lucide-react` | Icons |
-| `papaparse` | CSV parsing for data import |
+| `papaparse` | CSV parsing for initial data seed |
 | `recharts` | Income report charts |
-| `localStorage` | Client-side persistence |
 
-No backend. No router library — navigation is pure React state.
+No router library — navigation is pure React state.
 
 ---
 
 ## Getting Started
 
+### 1. Clone and install
+
 ```bash
-# Install dependencies
+git clone https://github.com/fridaruh/crm-attio.git
+cd crm-attio
 npm install
-
-# Start dev server
-npm run dev
-
-# Build for production
-npm run build
 ```
 
-Open [http://localhost:5173](http://localhost:5173).
+### 2. Configure Firebase
+
+Create a Firebase project at [console.firebase.google.com](https://console.firebase.google.com), enable **Firestore** and **Google Auth**, then add your config to `src/firebase.js`:
+
+```js
+const firebaseConfig = {
+  apiKey: "...",
+  authDomain: "...",
+  projectId: "...",
+  // ...
+};
+```
+
+### 3. Run
+
+```bash
+npm run dev        # dev server at http://localhost:5173
+npm run build      # production build
+```
 
 ---
 
 ## Data
 
-The app loads from CSV exports placed in `public/data/imported_data/`:
+On first login the app checks Firestore. If empty, it seeds from CSV exports in `public/data/imported_data/`:
 
 | File | Source |
 |---|---|
@@ -87,9 +111,7 @@ The app loads from CSV exports placed in `public/data/imported_data/`:
 | `People - Recently Contacted People.csv` | Attio People export |
 | `Companies - All Companies.csv` | Attio Companies export |
 
-Company enrichment data (country, industry, employees, description) is pre-built in `public/data/company_enrichment.json` — keyed by domain.
-
-On first load the CSVs are parsed and normalized; subsequent loads use `localStorage` cache. Bump the storage key version in `src/hooks/useData.js` to force a fresh reload.
+Company enrichment (country, industry, employees, description) is pre-built in `public/data/company_enrichment.json` keyed by domain. After seeding, all reads and writes go directly to Firestore.
 
 ---
 
@@ -102,13 +124,17 @@ src/
 │   ├── contacts/      ContactsView · ContactDetailPage
 │   ├── deals/         DealsView · KanbanBoard · DealCard · DealDetailPage
 │   ├── reports/       IncomeReport
-│   ├── shared/        RecordDetail · AddDealModal · AddPersonModal · AddCompanyModal · Avatar
-│   └── tasks/         TasksView
+│   ├── shared/        RecordDetail · CreateTaskModal · TaskDetailModal
+│   │                  AddDealModal · AddPersonModal · AddCompanyModal · Avatar
+│   ├── tasks/         TasksView
+│   ├── Login.jsx
+│   └── Sidebar.jsx
 ├── hooks/
-│   └── useData.js     Central data store + CRUD (localStorage + CSV)
+│   └── useData.js     Central data store + CRUD (Firestore)
 ├── utils/
 │   ├── enrichCompany.js   Abstract API enrichment helper
 │   └── linking.js         Record linking utilities
+├── firebase.js        Firebase app + Firestore + Auth init
 └── index.css          CSS custom properties (design tokens)
 ```
 
