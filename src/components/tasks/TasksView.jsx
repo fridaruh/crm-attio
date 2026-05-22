@@ -5,6 +5,7 @@ import {
   TrendingUp, Users, Building2, LayoutGrid, List, ChevronDown,
 } from 'lucide-react';
 import CreateTaskModal from '../shared/CreateTaskModal';
+import TaskDetailModal from '../shared/TaskDetailModal';
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -43,7 +44,7 @@ const RECORD_COLORS = { deal: '#8B5CF6', contact: '#3B82F6', company: '#10B981' 
 
 // ─── Task Card (kanban) ───────────────────────────────────────────────────────
 
-function TaskCard({ task, index, onToggle, onDelete, getRecordLabel }) {
+function TaskCard({ task, index, onToggle, onDelete, onOpen, getRecordLabel }) {
   const [hovered, setHovered] = useState(false);
   const due = formatDueDateLabel(task.due_date);
   const recordLabel = task.record_id ? getRecordLabel(task.record_id, task.record_type) : null;
@@ -59,6 +60,7 @@ function TaskCard({ task, index, onToggle, onDelete, getRecordLabel }) {
           {...provided.dragHandleProps}
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
+          onClick={() => onOpen(task)}
           style={{
             background: 'var(--bg)',
             border: '1px solid var(--border)',
@@ -67,7 +69,7 @@ function TaskCard({ task, index, onToggle, onDelete, getRecordLabel }) {
             marginBottom: 8,
             boxShadow: snapshot.isDragging ? 'var(--shadow-md)' : 'var(--shadow-xs)',
             opacity: snapshot.isDragging ? 0.95 : 1,
-            cursor: 'grab',
+            cursor: 'pointer',
             transition: 'box-shadow 0.15s',
             ...provided.draggableProps.style,
           }}
@@ -75,7 +77,7 @@ function TaskCard({ task, index, onToggle, onDelete, getRecordLabel }) {
           {/* Title row */}
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
             <button
-              onClick={() => onToggle(task.id)}
+              onClick={e => { e.stopPropagation(); onToggle(task.id); }}
               style={{
                 width: 15, height: 15, borderRadius: 4, flexShrink: 0, marginTop: 1,
                 border: status === 'done' ? 'none' : '1.5px solid var(--border)',
@@ -144,7 +146,7 @@ function TaskCard({ task, index, onToggle, onDelete, getRecordLabel }) {
 
 // ─── Task Row (list view) ─────────────────────────────────────────────────────
 
-function TaskRow({ task, onToggle, onDelete, getRecordLabel }) {
+function TaskRow({ task, onToggle, onDelete, onOpen, getRecordLabel }) {
   const [hovered, setHovered] = useState(false);
   const due = formatDueDateLabel(task.due_date);
   const recordLabel = task.record_id ? getRecordLabel(task.record_id, task.record_type) : null;
@@ -154,16 +156,18 @@ function TaskRow({ task, onToggle, onDelete, getRecordLabel }) {
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      onClick={() => onOpen(task)}
       style={{
         display: 'flex', alignItems: 'center', gap: 10,
         padding: '9px 20px',
         borderBottom: '1px solid var(--border)',
         background: hovered ? 'var(--bg-secondary)' : 'transparent',
         transition: 'background 0.1s',
+        cursor: 'pointer',
       }}
     >
       <button
-        onClick={() => onToggle(task.id)}
+        onClick={e => { e.stopPropagation(); onToggle(task.id); }}
         style={{
           width: 15, height: 15, borderRadius: 4, flexShrink: 0,
           border: status === 'done' ? 'none' : '1.5px solid var(--border)',
@@ -223,7 +227,7 @@ function TaskRow({ task, onToggle, onDelete, getRecordLabel }) {
           <button
             onClick={e => { e.stopPropagation(); onDelete(task.id); }}
             style={{ color: 'var(--text-muted)', display: 'flex', padding: 2 }}
-            onMouseEnter={e => e.currentTarget.style.color = '#EF4444'}
+            onMouseEnter={e => { e.stopPropagation(); e.currentTarget.style.color = '#EF4444'; }}
             onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
           >
             <Trash2 size={13} />
@@ -311,8 +315,9 @@ function ProjectFilter({ tasks, deals, contacts, companies, value, onChange }) {
 // ─── Main View ─────────────────────────────────────────────────────────────────
 
 export default function TasksView({ tasks, contacts, companies, deals, onAddTask, onToggleTask, onDeleteTask, onUpdateTask }) {
-  const [showCreate, setShowCreate] = useState(false);
-  const [viewMode,   setViewMode]   = useState('board');
+  const [showCreate,    setShowCreate]    = useState(false);
+  const [selectedTask,  setSelectedTask]  = useState(null);
+  const [viewMode,      setViewMode]      = useState('board');
   const [projectFilter, setProjectFilter] = useState(null);
 
   function getRecordLabel(id, type) {
@@ -477,6 +482,7 @@ export default function TasksView({ tasks, contacts, companies, deals, onAddTask
                             index={index}
                             onToggle={onToggleTask}
                             onDelete={onDeleteTask}
+                            onOpen={setSelectedTask}
                             getRecordLabel={getRecordLabel}
                           />
                         ))}
@@ -505,6 +511,7 @@ export default function TasksView({ tasks, contacts, companies, deals, onAddTask
                   task={task}
                   onToggle={onToggleTask}
                   onDelete={onDeleteTask}
+                  onOpen={setSelectedTask}
                   getRecordLabel={getRecordLabel}
                 />
               ))}
@@ -523,6 +530,17 @@ export default function TasksView({ tasks, contacts, companies, deals, onAddTask
           deals={deals}
           onSave={onAddTask}
           onClose={() => setShowCreate(false)}
+        />
+      )}
+
+      {selectedTask && (
+        <TaskDetailModal
+          task={selectedTask}
+          contacts={contacts}
+          companies={companies}
+          deals={deals}
+          onSave={onUpdateTask}
+          onClose={() => setSelectedTask(null)}
         />
       )}
     </div>
