@@ -53,11 +53,12 @@ function formatDate(iso) {
 }
 
 // ── Sort header cell ──────────────────────────────────────────────────────────
-function SortTh({ label, colKey, sortKey, sortDir, onSort, style = {} }) {
+function SortTh({ label, colKey, sortKey, sortDir, onSort, style = {}, className = '' }) {
   const active = sortKey === colKey;
   return (
     <th
       onClick={() => onSort(colKey)}
+      className={className}
       style={{
         cursor: 'pointer',
         userSelect: 'none',
@@ -262,14 +263,14 @@ export default function CompaniesView({ companies, contacts, deals, onSelectComp
   // Available sort columns (add/remove based on enrichment coverage)
   const columns = [
     { key: 'name',                label: 'Company',          style: { minWidth: 200 } },
-    { key: 'domain',              label: 'Domain',           style: { minWidth: 150 } },
-    { key: 'location',            label: 'Country',          style: { minWidth: 120 } },
-    { key: 'industry',            label: 'Industry',         style: { minWidth: 130 } },
-    { key: 'founded',             label: 'Founded',          style: { minWidth: 80 } },
-    { key: 'employees',           label: 'Employees',        style: { minWidth: 100 } },
+    { key: 'domain',              label: 'Domain',           style: { minWidth: 150 }, mobileHide: true },
+    { key: 'location',            label: 'Country',          style: { minWidth: 120 }, mobileHide: true },
+    { key: 'industry',            label: 'Industry',         style: { minWidth: 130 }, mobileHide: true },
+    { key: 'founded',             label: 'Founded',          style: { minWidth: 80 },  mobileHide: true },
+    { key: 'employees',           label: 'Employees',        style: { minWidth: 100 }, mobileHide: true },
     { key: 'connection_strength', label: 'Connection',       style: { minWidth: 130 } },
-    { key: 'last_interaction',    label: 'Last interaction', style: { minWidth: 130 } },
-    { key: 'people',              label: 'People',           style: { minWidth: 60, textAlign: 'right' } },
+    { key: 'last_interaction',    label: 'Last interaction', style: { minWidth: 130 }, mobileHide: true },
+    { key: 'people',              label: 'People',           style: { minWidth: 60, textAlign: 'right' }, mobileHide: true },
     { key: 'deals',               label: 'Deals',            style: { minWidth: 60, textAlign: 'right' } },
   ];
 
@@ -342,11 +343,11 @@ export default function CompaniesView({ companies, contacts, deals, onSelectComp
 
       {/* Table */}
       <div className="view-content" style={{ overflowY: 'auto', overflowX: 'auto' }}>
-        <table className="data-table" style={{ minWidth: 1100 }}>
+        <table className="data-table" style={{ minWidth: 600 }}>
           <thead>
             <tr>
               {columns.map(col => (
-                <SortTh key={col.key} label={col.label} colKey={col.key} style={col.style} {...thProps} />
+                <SortTh key={col.key} label={col.label} colKey={col.key} style={col.style} className={col.mobileHide ? 'hide-mobile' : ''} {...thProps} />
               ))}
             </tr>
           </thead>
@@ -362,14 +363,21 @@ export default function CompaniesView({ companies, contacts, deals, onSelectComp
                   <td style={{ maxWidth: 220 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <CompanyLogo name={company.name} domain={company.domain} />
-                      <span style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {company.name}
-                      </span>
+                      <div style={{ overflow: 'hidden' }}>
+                        <div style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {company.name}
+                        </div>
+                        {(company.industry || company.location) && (
+                          <div className="show-mobile" style={{ display: 'none', fontSize: 11, color: 'var(--text-muted)', marginTop: 1 }}>
+                            {company.industry || company.location}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </td>
 
                   {/* Domain */}
-                  <td>
+                  <td className="hide-mobile">
                     {company.domain ? (
                       <span
                         onClick={e => { e.stopPropagation(); window.open(`https://${company.domain}`, '_blank'); }}
@@ -383,12 +391,12 @@ export default function CompaniesView({ companies, contacts, deals, onSelectComp
                   </td>
 
                   {/* Country */}
-                  <td style={{ color: 'var(--text-secondary)', fontSize: 12.5 }}>
+                  <td className="hide-mobile" style={{ color: 'var(--text-secondary)', fontSize: 12.5 }}>
                     {company.location || '—'}
                   </td>
 
                   {/* Industry */}
-                  <td>
+                  <td className="hide-mobile">
                     {company.industry ? (
                       <span style={{
                         fontSize: 11.5, padding: '2px 7px', borderRadius: 'var(--radius-full)',
@@ -401,12 +409,12 @@ export default function CompaniesView({ companies, contacts, deals, onSelectComp
                   </td>
 
                   {/* Founded */}
-                  <td style={{ color: 'var(--text-secondary)', fontSize: 12.5, fontVariantNumeric: 'tabular-nums' }}>
+                  <td className="hide-mobile" style={{ color: 'var(--text-secondary)', fontSize: 12.5, fontVariantNumeric: 'tabular-nums' }}>
                     {company.founded || '—'}
                   </td>
 
                   {/* Employees */}
-                  <td style={{ color: 'var(--text-secondary)', fontSize: 12.5 }}>
+                  <td className="hide-mobile" style={{ color: 'var(--text-secondary)', fontSize: 12.5 }}>
                     {company.employees || '—'}
                   </td>
 
@@ -415,18 +423,18 @@ export default function CompaniesView({ companies, contacts, deals, onSelectComp
                     {cfg ? (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         <div style={{ width: 7, height: 7, borderRadius: '50%', background: cfg.color, flexShrink: 0 }} />
-                        <span style={{ fontSize: 12.5, color: 'var(--text-secondary)' }}>{company.connection_strength}</span>
+                        <span className="hide-mobile" style={{ fontSize: 12.5, color: 'var(--text-secondary)' }}>{company.connection_strength}</span>
                       </div>
                     ) : <span style={{ color: 'var(--text-muted)' }}>—</span>}
                   </td>
 
                   {/* Last interaction */}
-                  <td style={{ color: 'var(--text-secondary)', fontSize: 12.5 }}>
+                  <td className="hide-mobile" style={{ color: 'var(--text-secondary)', fontSize: 12.5 }}>
                     {formatDate(company.last_interaction)}
                   </td>
 
                   {/* People */}
-                  <td style={{ textAlign: 'right' }}>
+                  <td className="hide-mobile" style={{ textAlign: 'right' }}>
                     <span style={{ fontSize: 12.5, fontWeight: cc > 0 ? 500 : 400, color: cc > 0 ? 'var(--text)' : 'var(--text-muted)' }}>
                       {cc || '—'}
                     </span>

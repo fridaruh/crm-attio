@@ -17,10 +17,10 @@ function formatDate(iso) {
   return d.toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: '2-digit' });
 }
 
-function SortTh({ label, colKey, sortKey, sortDir, onSort, style = {} }) {
+function SortTh({ label, colKey, sortKey, sortDir, onSort, style = {}, className = '' }) {
   const active = sortKey === colKey;
   return (
-    <th onClick={() => onSort(colKey)} style={{ cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap', ...style }}>
+    <th onClick={() => onSort(colKey)} className={className} style={{ cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap', ...style }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
         <span style={{ color: active ? 'var(--purple)' : undefined }}>{label}</span>
         <span style={{ opacity: active ? 1 : 0.25, color: active ? 'var(--purple)' : 'var(--text-muted)', display: 'flex' }}>
@@ -31,7 +31,7 @@ function SortTh({ label, colKey, sortKey, sortDir, onSort, style = {} }) {
   );
 }
 
-function sortContacts(contacts, key, dir) {
+function sortContacts(contacts, key, dir, companyById = {}) {
   return [...contacts].sort((a, b) => {
     let av, bv;
     if (key === 'connection_strength') {
@@ -44,6 +44,11 @@ function sortContacts(contacts, key, dir) {
       bv = b[key] ? new Date(b[key]).getTime() : 0;
       return dir === 'asc' ? av - bv : bv - av;
     }
+    if (key === 'company_id') {
+      av = (a.company_id ? companyById[String(a.company_id)]?.name : '') || '';
+      bv = (b.company_id ? companyById[String(b.company_id)]?.name : '') || '';
+      return dir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av);
+    }
     av = String(a[key] || '').toLowerCase();
     bv = String(b[key] || '').toLowerCase();
     return dir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av);
@@ -55,17 +60,24 @@ export default function ContactsView({ contacts, companies, onSelectContact, onA
   const [sortKey, setSortKey] = useState('last_email');
   const [sortDir, setSortDir] = useState('desc');
 
+  const companyById = Object.fromEntries(companies.map(c => [String(c.id), c]));
+
   function handleSort(key) {
     if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
     else { setSortKey(key); setSortDir('desc'); }
   }
 
-  const filtered = contacts.filter(c =>
-    c.name?.toLowerCase().includes(search.toLowerCase()) ||
-    c.email?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = contacts.filter(c => {
+    const q = search.toLowerCase();
+    const company = c.company_id ? companyById[String(c.company_id)] : null;
+    return (
+      c.name?.toLowerCase().includes(q) ||
+      c.email?.toLowerCase().includes(q) ||
+      company?.name?.toLowerCase().includes(q)
+    );
+  });
 
-  const sorted  = sortContacts(filtered, sortKey, sortDir);
+  const sorted  = sortContacts(filtered, sortKey, sortDir, companyById);
   const visible = sorted.slice(0, 500);
   const thProps = { sortKey, sortDir, onSort: handleSort };
 
@@ -115,6 +127,7 @@ export default function ContactsView({ contacts, companies, onSelectContact, onA
           <thead>
             <tr>
               <SortTh label="Name"         colKey="name"                style={{ minWidth: 200 }} {...thProps} />
+              <SortTh label="Company"      colKey="company_id"          style={{ minWidth: 160 }} {...thProps} className="hide-mobile" />
               <SortTh label="Connection"   colKey="connection_strength" style={{ minWidth: 130 }} {...thProps} className="hide-mobile" />
               <SortTh label="Last email"   colKey="last_email"          style={{ minWidth: 120 }} {...thProps} className="hide-mobile" />
               <SortTh label="Last meeting" colKey="last_calendar"       style={{ minWidth: 120 }} {...thProps} className="hide-mobile" />
@@ -123,6 +136,7 @@ export default function ContactsView({ contacts, companies, onSelectContact, onA
           <tbody>
             {visible.map(contact => {
               const strength = STRENGTH_CONFIG[contact.connection_strength];
+              const company  = contact.company_id ? companyById[String(contact.company_id)] : null;
               return (
                 <tr key={contact.id} onClick={() => onSelectContact(contact)}>
                   <td style={{ maxWidth: 260 }}>
@@ -132,6 +146,11 @@ export default function ContactsView({ contacts, companies, onSelectContact, onA
                         <div style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {contact.name}
                         </div>
+                        {company && (
+                          <div style={{ fontSize: 11.5, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {company.name}
+                          </div>
+                        )}
                         {strength && (
                           <div className="show-mobile" style={{ display: 'none', alignItems: 'center', gap: 4, marginTop: 2 }}>
                             <div style={{ width: 6, height: 6, borderRadius: '50%', background: strength.color }} />
@@ -140,6 +159,22 @@ export default function ContactsView({ contacts, companies, onSelectContact, onA
                         )}
                       </div>
                     </div>
+                  </td>
+                  <td className="hide-mobile" style={{ maxWidth: 180 }}>
+                    {company ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <div style={{
+                          width: 18, height: 18, borderRadius: 3, background: '#7C5CFC',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: 9, fontWeight: 700, color: 'white', flexShrink: 0,
+                        }}>
+                          {company.name.charAt(0)}
+                        </div>
+                        <span style={{ fontSize: 12.5, color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {company.name}
+                        </span>
+                      </div>
+                    ) : <span style={{ color: 'var(--text-muted)' }}>—</span>}
                   </td>
                   <td className="hide-mobile">
                     {strength ? (
