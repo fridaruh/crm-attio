@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Home, CheckSquare, Zap, Settings, Bell, LogOut } from 'lucide-react';
+import { Home, CheckSquare, Zap, Settings, Bell, LogOut, Menu } from 'lucide-react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from './firebase';
 import Login from './components/Login';
@@ -16,6 +16,7 @@ import AddCompanyModal from './components/shared/AddCompanyModal';
 import IncomeReport from './components/reports/IncomeReport';
 import TasksView from './components/tasks/TasksView';
 import { useData } from './hooks/useData';
+import { useCurrency } from './hooks/useCurrency';
 
 const ALLOWED_EMAIL = 'i.am@fridaruh.com';
 
@@ -25,6 +26,7 @@ export default function App() {
 
   // All hooks must be declared unconditionally at the top
   const [view, setView] = useState('deals');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedDealId, setSelectedDealId]       = useState(null);
   const [selectedContactId, setSelectedContactId] = useState(null);
   const [selectedRecord, setSelectedRecord] = useState(null);
@@ -33,6 +35,8 @@ export default function App() {
   const [showAddDeal, setShowAddDeal] = useState(false);
   const [showAddPerson, setShowAddPerson] = useState(false);
   const [showAddCompany, setShowAddCompany] = useState(false);
+
+  const usdToMxn = useCurrency();
 
   const {
     deals, contacts, companies, activities, tasks, notes, loading,
@@ -67,11 +71,38 @@ export default function App() {
     setShowAddDeal(true);
   }
 
+  function navigate(v) {
+    setView(v);
+    setSidebarOpen(false);
+  }
+
   return (
     <div className="app-layout">
-      <Sidebar currentView={view} onNavigate={setView} onLogout={() => signOut(auth)} />
+      {/* Backdrop — closes sidebar when clicking outside (desktop) */}
+      {sidebarOpen && (
+        <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />
+      )}
+
+      <Sidebar
+        isOpen={sidebarOpen}
+        currentView={view}
+        onNavigate={navigate}
+        onLogout={() => signOut(auth)}
+      />
 
       <main className="main-content">
+        {/* Desktop topbar with toggle */}
+        <div className="desktop-topbar">
+          <button
+            className="sidebar-toggle-btn"
+            onClick={() => setSidebarOpen(p => !p)}
+            title={sidebarOpen ? 'Cerrar menú' : 'Abrir menú'}
+          >
+            <Menu size={16} />
+          </button>
+        </div>
+
+        <div className="main-view-container">
         {view === 'deals' && selectedDealId ? (
           <DealDetailPage
             dealId={selectedDealId}
@@ -81,6 +112,7 @@ export default function App() {
             activities={activities}
             tasks={tasks}
             notes={notes}
+            usdToMxn={usdToMxn}
             updateDeal={updateDeal}
             archiveDeal={archiveDeal}
             addTask={addTask}
@@ -97,6 +129,7 @@ export default function App() {
             notes={notes}
             getCompany={getCompany}
             getContact={getContact}
+            usdToMxn={usdToMxn}
             onMoveDeal={moveDeal}
             onAddDeal={openAddDeal}
             onSelectDeal={(deal) => setSelectedDealId(deal.id)}
@@ -158,6 +191,7 @@ export default function App() {
         {['home', 'notifications', 'automations', 'settings'].includes(view) && (
           <PlaceholderView view={view} />
         )}
+        </div>{/* end main-view-container */}
       </main>
 
       {selectedRecord && (

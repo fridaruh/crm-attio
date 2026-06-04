@@ -1,16 +1,18 @@
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { Plus } from 'lucide-react';
 import DealCard, { STAGE_CONFIG, formatCurrency } from './DealCard';
+import { toMxn } from '../../utils/banxico';
 
 const STAGES = [
   'Lead',
+  'Clases',
   'Por realizarse',
   'Por facturar',
   'Por recibir pago',
   'Pagado',
 ];
 
-export default function KanbanBoard({ deals, getCompany, tasks, notes, onMoveDeal, onSelectDeal, onAddDeal, onAddTask, onAddNote }) {
+export default function KanbanBoard({ deals, getCompany, tasks, notes, usdToMxn, onMoveDeal, onSelectDeal, onAddDeal, onAddTask, onAddNote }) {
   function handleDragEnd(result) {
     const { destination, source, draggableId } = result;
     if (!destination) return;
@@ -32,7 +34,7 @@ export default function KanbanBoard({ deals, getCompany, tasks, notes, onMoveDea
         {STAGES.map(stageId => {
           const config = STAGE_CONFIG[stageId];
           const stageDeals = deals.filter(d => d.stage === stageId);
-          const total = stageDeals.reduce((sum, d) => sum + (Number(d.value) || 0), 0);
+          const total = stageDeals.reduce((sum, d) => sum + toMxn(d.value, d.currency, usdToMxn), 0);
 
           return (
             <div
@@ -88,7 +90,7 @@ export default function KanbanBoard({ deals, getCompany, tasks, notes, onMoveDea
                       color: 'var(--text-muted)',
                       fontWeight: 500,
                     }}>
-                      {formatCurrency(total)}
+                      {formatCurrency(total)} MXN
                     </span>
                   )}
                   <button

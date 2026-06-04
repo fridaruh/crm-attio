@@ -5,8 +5,9 @@ import {
 } from 'lucide-react';
 import Avatar, { getColor } from '../shared/Avatar';
 import { STAGE_CONFIG, formatCurrency } from './DealCard';
+import { toMxn } from '../../utils/banxico';
 
-const STAGES = ['Lead', 'Por realizarse', 'Por facturar', 'Por recibir pago', 'Pagado'];
+const STAGES = ['Lead', 'Clases', 'Por realizarse', 'Por facturar', 'Por recibir pago', 'Pagado'];
 
 function relativeTime(isoStr) {
   if (!isoStr) return '';
@@ -111,7 +112,7 @@ function FieldRow({ label, children }) {
 }
 
 // ── LeftPanel ─────────────────────────────────────────────────────────────────
-function LeftPanel({ deal, contacts, companies, updateDeal }) {
+function LeftPanel({ deal, contacts, companies, updateDeal, usdToMxn }) {
   const [editingField, setEditingField] = useState(null);
   const [fieldValue, setFieldValue] = useState('');
 
@@ -161,7 +162,7 @@ function LeftPanel({ deal, contacts, companies, updateDeal }) {
   };
 
   return (
-    <div style={{
+    <div className="dp-left-panel" style={{
       width: 280,
       flexShrink: 0,
       borderRight: '1px solid var(--border)',
@@ -254,24 +255,78 @@ function LeftPanel({ deal, contacts, companies, updateDeal }) {
         )}
       </FieldRow>
 
+      {/* Moneda — campo independiente, siempre visible */}
+      <FieldRow label="Moneda">
+        <select
+          value={deal.currency || 'MXN'}
+          onChange={e => updateDeal(deal.id, { currency: e.target.value })}
+          style={{
+            fontSize: 13, fontWeight: 600,
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-sm)',
+            padding: '3px 8px',
+            background: 'var(--bg-secondary)',
+            color: 'var(--text)',
+            cursor: 'pointer',
+            outline: 'none',
+          }}
+        >
+          <option value="MXN">$ MXN</option>
+          <option value="USD">$ USD</option>
+        </select>
+      </FieldRow>
+
       {/* Value */}
-      <FieldRow label="Value">
+      <FieldRow label="Valor">
         {editingField === 'value' ? (
           <input
             autoFocus type="number" value={fieldValue}
             onChange={e => setFieldValue(e.target.value)}
             onBlur={() => { updateDeal(deal.id, { value: parseFloat(fieldValue) || 0 }); setEditingField(null); }}
-            onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') setEditingField(null); }}
+            onKeyDown={e => {
+              if (e.key === 'Enter') { updateDeal(deal.id, { value: parseFloat(fieldValue) || 0 }); setEditingField(null); }
+              if (e.key === 'Escape') setEditingField(null);
+            }}
+            style={inputStyle}
+          />
+        ) : (
+          <div onClick={() => startEdit('value', deal.value)}>
+            <span
+              style={clickableValue}
+              onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-secondary)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            >
+              {deal.value
+                ? formatCurrency(deal.value, deal.currency || 'MXN')
+                : <span style={{ color: 'var(--text-muted)' }}>—</span>}
+            </span>
+            {deal.currency === 'USD' && deal.value && usdToMxn && (
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                ≈ {formatCurrency(toMxn(deal.value, 'USD', usdToMxn))} MXN
+              </div>
+            )}
+          </div>
+        )}
+      </FieldRow>
+
+      {/* Fecha de realización */}
+      <FieldRow label="Realización">
+        {editingField === 'realizacion_date' ? (
+          <input
+            autoFocus type="date" value={fieldValue}
+            onChange={e => setFieldValue(e.target.value)}
+            onBlur={() => commitEdit('realizacion_date')}
+            onKeyDown={e => handleKey(e, 'realizacion_date')}
             style={inputStyle}
           />
         ) : (
           <span
             style={clickableValue}
-            onClick={() => startEdit('value', deal.value)}
+            onClick={() => startEdit('realizacion_date', deal.realizacion_date || '')}
             onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-secondary)'}
             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
           >
-            {deal.value ? formatCurrency(deal.value) : <span style={{ color: 'var(--text-muted)' }}>—</span>}
+            {deal.realizacion_date || <span style={{ color: 'var(--text-muted)' }}>Agregar fecha</span>}
           </span>
         )}
       </FieldRow>
@@ -459,7 +514,7 @@ function ActivityList({ activities }) {
 }
 
 // ── OverviewTab ───────────────────────────────────────────────────────────────
-function OverviewTab({ deal, activities, tasks }) {
+function OverviewTab({ deal, activities, tasks, usdToMxn }) {
   const stageIdx = STAGES.indexOf(deal.stage);
   const progress = stageIdx >= 0 ? ((stageIdx + 1) / STAGES.length) * 100 : 0;
   const stage = STAGE_CONFIG[deal.stage] || STAGE_CONFIG['Lead'];
@@ -491,9 +546,13 @@ function OverviewTab({ deal, activities, tasks }) {
         <div style={{ padding: 14, borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
           <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 7, fontWeight: 500 }}>Deal value</div>
           <div style={{ fontSize: 19, fontWeight: 700, letterSpacing: '-0.5px' }}>
-            {formatCurrency(deal.value)}
+            {formatCurrency(deal.value, deal.currency || 'MXN')}
           </div>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{deal.currency || 'MXN'}</div>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>
+            {deal.currency === 'USD' && usdToMxn
+              ? `≈ ${formatCurrency(toMxn(deal.value, 'USD', usdToMxn))} MXN`
+              : (deal.currency || 'MXN')}
+          </div>
         </div>
 
         {/* Owner card */}
@@ -819,7 +878,7 @@ function PeopleTab({ deal, contacts, companies, updateDeal }) {
 // ── DealDetailPage ─────────────────────────────────────────────────────────────
 export default function DealDetailPage({
   dealId, deals, contacts, companies,
-  activities, tasks, notes,
+  activities, tasks, notes, usdToMxn,
   updateDeal, archiveDeal, addTask, toggleTask, deleteTask, addNote, deleteNote,
   onBack,
 }) {
@@ -863,16 +922,17 @@ export default function DealDetailPage({
         </div>
       )}
 
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+      <div className="dp-body" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         <LeftPanel
           deal={deal}
           contacts={contacts}
           companies={companies}
           updateDeal={updateDeal}
+          usdToMxn={usdToMxn}
         />
 
         {/* Right panel */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
+        <div className="dp-right-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
           {/* Tab bar */}
           <div style={{
             display: 'flex',
@@ -909,7 +969,7 @@ export default function DealDetailPage({
 
           {/* Tab content */}
           <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-            {activeTab === 'overview' && <OverviewTab deal={deal} activities={activities} tasks={tasks} />}
+            {activeTab === 'overview' && <OverviewTab deal={deal} activities={activities} tasks={tasks} usdToMxn={usdToMxn} />}
             {activeTab === 'activity' && <ActivityTab deal={deal} activities={activities} />}
             {activeTab === 'notes'    && <NotesTab deal={deal} notes={notes} addNote={addNote} deleteNote={deleteNote} />}
             {activeTab === 'tasks'    && <TasksTab deal={deal} tasks={tasks} addTask={addTask} toggleTask={toggleTask} deleteTask={deleteTask} />}

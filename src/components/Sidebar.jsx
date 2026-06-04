@@ -29,13 +29,13 @@ const bottomItems = [
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
-export default function Sidebar({ currentView, onNavigate, onLogout }) {
+export default function Sidebar({ isOpen, currentView, onNavigate, onLogout }) {
   const workspace = 'Frida Ruh';
   const color = workspaceColor(workspace);
 
   return (
     <>
-    <aside className="app-sidebar" style={{
+    <aside className={`app-sidebar${isOpen ? ' sidebar-open' : ''}`} style={{
       width: 'var(--sidebar-width)',
       background: 'var(--sidebar-bg)',
       display: 'flex',

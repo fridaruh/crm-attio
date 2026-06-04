@@ -111,6 +111,78 @@ a { text-decoration: none; color: inherit; }
   min-width: 0;
 }
 
+/* ── Collapsible sidebar (desktop) ─────────────────────────────────────────── */
+.app-sidebar {
+  transition: transform 220ms ease, box-shadow 220ms ease;
+}
+
+@media (min-width: 769px) {
+  .app-sidebar {
+    position: fixed !important;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    height: 100vh;
+    z-index: 300;
+    transform: translateX(calc(-1 * var(--sidebar-width) - 4px));
+  }
+
+  .app-sidebar.sidebar-open {
+    transform: translateX(0);
+    box-shadow: 6px 0 24px rgba(0,0,0,0.10);
+  }
+
+  .sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.18);
+    z-index: 280;
+    animation: fadeIn 180ms ease;
+    cursor: pointer;
+  }
+}
+
+/* ── Desktop topbar (sidebar toggle row) ───────────────────────────────────── */
+.desktop-topbar {
+  height: 42px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  background: var(--bg);
+}
+
+.sidebar-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  transition: all var(--transition);
+}
+
+.sidebar-toggle-btn:hover {
+  background: var(--bg-secondary);
+  color: var(--text);
+}
+
+/* ── Main view container ──────────────────────────────────────────────────── */
+.main-view-container {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+@media (max-width: 768px) {
+  .desktop-topbar { display: none; }
+  .sidebar-backdrop { display: none; }
+}
+
 /* Shared button styles */
 .btn-primary {
   display: inline-flex;
@@ -631,4 +703,73 @@ a { text-decoration: none; color: inherit; }
 /* Hide mobile nav on desktop */
 .mobile-nav {
   display: none;
+}
+
+/* ── Medium screens: 769–1100px ────────────────────────────────────────────── */
+@media (max-width: 1100px) and (min-width: 769px) {
+  /* Deal detail: shrink left panel */
+  .dp-left-panel {
+    width: 220px !important;
+    padding: 16px 14px 32px !important;
+  }
+
+  /* View header: smaller title + compact buttons */
+  .view-header-title { font-size: 15px; }
+
+  /* Calendar annual: 3 cols instead of 4 */
+  /* (handled inline via JS grid but CSS can override) */
+}
+
+/* ── Tables: always horizontally scrollable ────────────────────────────────── */
+.table-scroll-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Deal detail page: on mobile, stack panels vertically ──────────────────── */
+@media (max-width: 768px) {
+  .dp-left-panel {
+    width: 100% !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border);
+    max-height: 45vh;
+    padding: 16px 16px 24px !important;
+  }
+
+  /* Deal detail flex: column on mobile */
+  .dp-body {
+    flex-direction: column !important;
+    overflow-y: auto !important;
+  }
+
+  /* Right panel on mobile: full width */
+  .dp-right-panel {
+    min-width: 0 !important;
+    overflow: visible !important;
+  }
+}
+
+/* ── Modal responsive ──────────────────────────────────────────────────────── */
+@media (max-width: 540px) {
+  .modal-box {
+    width: calc(100vw - 24px);
+    margin: 0 12px;
+    border-radius: var(--radius-lg);
+  }
+}
+
+/* ── View header: prevent overflow on narrow screens ──────────────────────── */
+@media (max-width: 900px) and (min-width: 769px) {
+  .view-header {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-bottom: 4px;
+  }
+
+  .view-header-right {
+    padding-bottom: 8px;
+  }
+
+  /* Hide filter button on medium screens too */
+  .hide-tablet { display: none !important; }
 }

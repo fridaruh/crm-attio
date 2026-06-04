@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { X } from 'lucide-react';
 
 const STAGES = [
-  { value: 'Lead', label: 'Lead' },
-  { value: 'Por realizarse', label: 'Por realizarse' },
-  { value: 'Por facturar', label: 'Por facturar' },
+  { value: 'Lead',             label: 'Lead' },
+  { value: 'Clases',           label: 'Clases' },
+  { value: 'Por realizarse',   label: 'Por realizarse' },
+  { value: 'Por facturar',     label: 'Por facturar' },
   { value: 'Por recibir pago', label: 'Por recibir pago' },
-  { value: 'Pagado', label: 'Pagado' },
+  { value: 'Pagado',           label: 'Pagado' },
 ];
 
 export default function AddDealModal({ defaultStage, companies, contacts, onSave, onClose }) {
@@ -15,8 +16,10 @@ export default function AddDealModal({ defaultStage, companies, contacts, onSave
     company_id: '',
     contact_id: '',
     value: '',
-    stage: defaultStage || 'qualification',
+    currency: 'MXN',
+    stage: defaultStage || 'Lead',
     owner: '',
+    realizacion_date: '',
     close_date: '',
     notes: '',
   });
@@ -102,14 +105,34 @@ export default function AddDealModal({ defaultStage, companies, contacts, onSave
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div className="form-field">
-                <label>Value (USD)</label>
-                <input
-                  type="number"
-                  placeholder="0"
-                  value={form.value}
-                  onChange={set('value')}
-                  min="0"
-                />
+                <label>Valor</label>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <select
+                    value={form.currency}
+                    onChange={set('currency')}
+                    style={{
+                      width: 76, flexShrink: 0,
+                      padding: '0 6px',
+                      border: '1px solid var(--border)',
+                      borderRadius: 'var(--radius-sm)',
+                      fontSize: 13, fontWeight: 600,
+                      background: 'var(--bg-secondary)',
+                      color: 'var(--text)',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <option value="MXN">$ MXN</option>
+                    <option value="USD">$ USD</option>
+                  </select>
+                  <input
+                    type="number"
+                    placeholder="0"
+                    value={form.value}
+                    onChange={set('value')}
+                    min="0"
+                    style={{ flex: 1 }}
+                  />
+                </div>
               </div>
 
               <div className="form-field">
@@ -132,6 +155,17 @@ export default function AddDealModal({ defaultStage, companies, contacts, onSave
                 />
               </div>
 
+              <div className="form-field">
+                <label>Fecha de realización</label>
+                <input
+                  type="date"
+                  value={form.realizacion_date}
+                  onChange={set('realizacion_date')}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div className="form-field">
                 <label>Close date</label>
                 <input

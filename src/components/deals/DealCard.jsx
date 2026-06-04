@@ -5,6 +5,7 @@ import CreateTaskModal from '../shared/CreateTaskModal';
 
 export const STAGE_CONFIG = {
   'Lead':              { color: '#6B7280', bg: '#F9FAFB',  label: 'Lead' },
+  'Clases':            { color: '#EC4899', bg: '#FDF2F8',  label: 'Clases' },
   'Por realizarse':    { color: '#F59E0B', bg: '#FFFBEB',  label: 'Por realizarse' },
   'Por facturar':      { color: '#8B5CF6', bg: '#F5F3FF',  label: 'Por facturar' },
   'Por recibir pago':  { color: '#3B82F6', bg: '#EFF6FF',  label: 'Por recibir pago' },

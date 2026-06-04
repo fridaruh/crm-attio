@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { Plus, LayoutGrid, List, SlidersHorizontal, Search, Archive, ArchiveRestore } from 'lucide-react';
+import { Plus, LayoutGrid, List, SlidersHorizontal, Search, Archive, ArchiveRestore, CalendarDays } from 'lucide-react';
 import KanbanBoard from './KanbanBoard';
+import DealsCalendar from './DealsCalendar';
 import { STAGE_CONFIG, formatCurrency } from './DealCard';
+import { toMxn } from '../../utils/banxico';
 import Avatar from '../shared/Avatar';
 
 export default function DealsView({
-  deals, tasks, notes, getCompany, getContact,
+  deals, tasks, notes, getCompany, getContact, usdToMxn,
   onMoveDeal, onAddDeal, onSelectDeal, onArchiveDeal, onAddTask, onAddNote,
 }) {
   const [view, setView]               = useState('kanban');
@@ -20,7 +22,7 @@ export default function DealsView({
     getCompany(d.company_id)?.name?.toLowerCase().includes(search.toLowerCase())
   );
 
-  const totalValue = activeDeals.reduce((s, d) => s + (Number(d.value) || 0), 0);
+  const totalMxn = activeDeals.reduce((s, d) => s + toMxn(d.value, d.currency, usdToMxn), 0);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
@@ -37,7 +39,7 @@ export default function DealsView({
                 background: 'var(--bg-secondary)', padding: '2px 8px',
                 borderRadius: 'var(--radius-full)', fontWeight: 500,
               }}>
-                {activeDeals.length} deals · {formatCurrency(totalValue)}
+                {activeDeals.length} deals · {formatCurrency(totalMxn)} MXN
               </span>
             )}
             {archivedDeals.length > 0 && (
@@ -75,6 +77,13 @@ export default function DealsView({
               >
                 <List size={13} />
                 Table
+              </button>
+              <button
+                className={`view-tab ${view === 'calendar' ? 'active' : ''}`}
+                onClick={() => setView('calendar')}
+              >
+                <CalendarDays size={13} />
+                Calendario
               </button>
             </div>
           )}
@@ -131,16 +140,22 @@ export default function DealsView({
             tasks={tasks}
             notes={notes}
             getCompany={getCompany}
+            usdToMxn={usdToMxn}
             onMoveDeal={onMoveDeal}
             onSelectDeal={onSelectDeal}
             onAddDeal={onAddDeal}
             onAddTask={onAddTask}
             onAddNote={onAddNote}
           />
-        ) : (
+        ) : view === 'table' ? (
           <DealsTable
             deals={filtered}
             getCompany={getCompany}
+            onSelectDeal={onSelectDeal}
+          />
+        ) : (
+          <DealsCalendar
+            deals={filtered}
             onSelectDeal={onSelectDeal}
           />
         )}
@@ -296,3 +311,4 @@ function ArchivedTable({ deals, getCompany, onSelectDeal, onUnarchive }) {
     </div>
   );
 }
+
