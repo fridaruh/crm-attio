@@ -111,40 +111,36 @@ a { text-decoration: none; color: inherit; }
   min-width: 0;
 }
 
-/* ── Collapsible sidebar (desktop) ─────────────────────────────────────────── */
+/* ── Sidebar: overlay en todos los tamaños ─────────────────────────────────── */
 .app-sidebar {
+  position: fixed !important;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  height: 100vh;
+  z-index: 300;
+  transform: translateX(calc(-1 * var(--sidebar-width) - 4px));
   transition: transform 220ms ease, box-shadow 220ms ease;
 }
 
-@media (min-width: 769px) {
-  .app-sidebar {
-    position: fixed !important;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    height: 100vh;
-    z-index: 300;
-    transform: translateX(calc(-1 * var(--sidebar-width) - 4px));
-  }
-
-  .app-sidebar.sidebar-open {
-    transform: translateX(0);
-    box-shadow: 6px 0 24px rgba(0,0,0,0.10);
-  }
-
-  .sidebar-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.18);
-    z-index: 280;
-    animation: fadeIn 180ms ease;
-    cursor: pointer;
-  }
+.app-sidebar.sidebar-open {
+  transform: translateX(0);
+  box-shadow: 6px 0 24px rgba(0,0,0,0.12);
 }
 
-/* ── Desktop topbar (sidebar toggle row) ───────────────────────────────────── */
+/* Backdrop visible en todos los tamaños */
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.22);
+  z-index: 280;
+  animation: fadeIn 180ms ease;
+  cursor: pointer;
+}
+
+/* ── Topbar con botón hamburguesa ──────────────────────────────────────────── */
 .desktop-topbar {
-  height: 42px;
+  height: 46px;
   padding: 0 14px;
   display: flex;
   align-items: center;
@@ -157,8 +153,8 @@ a { text-decoration: none; color: inherit; }
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: 34px;
+  height: 34px;
   border-radius: var(--radius-sm);
   color: var(--text-secondary);
   transition: all var(--transition);
@@ -176,11 +172,6 @@ a { text-decoration: none; color: inherit; }
   display: flex;
   flex-direction: column;
   min-height: 0;
-}
-
-@media (max-width: 768px) {
-  .desktop-topbar { display: none; }
-  .sidebar-backdrop { display: none; }
 }
 
 /* Shared button styles */
@@ -546,17 +537,36 @@ a { text-decoration: none; color: inherit; }
 
 /* ── Mobile (iPhone 15 = 393px) ─────────────────────────────────────────── */
 @media (max-width: 768px) {
-  /* Layout: sidebar goes away, bottom nav takes over */
   .app-layout {
     flex-direction: column;
   }
 
-  .app-sidebar {
-    display: none;
-  }
+  /* Sidebar ya es position:fixed y se controla con .sidebar-open — no ocultar */
 
   .main-content {
-    padding-bottom: 60px; /* space for bottom nav */
+    padding-bottom: 60px; /* espacio para el bottom nav */
+  }
+
+  /* Sidebar cubre toda la pantalla en móvil */
+  .app-sidebar {
+    width: 100vw !important;
+    max-width: 320px;
+  }
+
+  /* Backdrop visible sobre el bottom nav */
+  .sidebar-backdrop {
+    z-index: 290;
+  }
+
+  /* Sidebar por encima del backdrop */
+  .app-sidebar {
+    z-index: 400;
+  }
+
+  /* Topbar más compacto en móvil */
+  .desktop-topbar {
+    height: 48px;
+    padding: 0 16px;
   }
 
   /* Bottom tab bar */
