@@ -331,6 +331,7 @@ export function useData() {
     };
     setDoc(doc(db, 'contacts', newContact.id), clean(newContact)).catch(console.error);
     setContacts(prev => [newContact, ...prev]);
+    return newContact;
   }, []);
 
   const updateContact = useCallback((id, changes) => {
@@ -361,6 +362,7 @@ export function useData() {
     };
     setDoc(doc(db, 'companies', newCompany.id), clean(newCompany)).catch(console.error);
     setCompanies(prev => [newCompany, ...prev]);
+    return newCompany;
   }, []);
 
   const updateCompany = useCallback((id, changes) => {

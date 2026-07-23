@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   ArrowLeft, ChevronRight, Mail, List, Copy, Link2,
   Plus, Check, Trash2, X, Calendar, Users, Archive, ArchiveRestore,
@@ -6,8 +6,121 @@ import {
 import Avatar, { getColor } from '../shared/Avatar';
 import { STAGE_CONFIG, formatCurrency } from './DealCard';
 import { toMxn } from '../../utils/banxico';
+import { dedupeAndSort } from '../../utils/dedupe';
 
 const STAGES = ['Lead', 'Clases', 'Por realizarse', 'Por facturar', 'Por recibir pago', 'Pagado'];
+
+const inputStyle = {
+  width: '100%',
+  padding: '3px 7px',
+  border: '1px solid var(--purple)',
+  borderRadius: 'var(--radius-sm)',
+  fontSize: 13,
+  background: 'var(--bg)',
+  outline: 'none',
+  boxShadow: '0 0 0 3px rgba(124,92,252,0.12)',
+  fontFamily: 'inherit',
+};
+
+const clickableValue = {
+  fontSize: 13,
+  color: 'var(--text)',
+  cursor: 'text',
+  borderRadius: 'var(--radius-sm)',
+  padding: '2px 4px',
+  margin: '-2px -4px',
+  display: 'inline-block',
+  transition: 'background var(--transition)',
+};
+
+// ── EntityField ───────────────────────────────────────────────────────────────
+// Search + select input backed by a <datalist>, with inline "create new" support.
+let entityFieldSeq = 0;
+function EntityField({ items, currentEntity, onSelect, onCreate, placeholder, emptyLabel, renderChip }) {
+  const [editing, setEditing] = useState(false);
+  const [text, setText] = useState('');
+  const [listId] = useState(() => `entity-field-${++entityFieldSeq}`);
+  const sorted = useMemo(() => dedupeAndSort(items), [items]);
+
+  const trimmed = text.trim();
+  const exactMatch = trimmed && sorted.find(i => i.name.toLowerCase() === trimmed.toLowerCase());
+  const canCreate = trimmed && !exactMatch;
+
+  function commitSelection(item) {
+    onSelect(item.id);
+    setEditing(false);
+  }
+
+  function handleCreate() {
+    if (!trimmed) return;
+    const created = onCreate({ name: trimmed });
+    onSelect(created.id);
+    setEditing(false);
+  }
+
+  if (editing) {
+    return (
+      <div>
+        <input
+          autoFocus
+          list={listId}
+          value={text}
+          placeholder={placeholder}
+          onChange={e => {
+            setText(e.target.value);
+            const match = sorted.find(i => i.name === e.target.value);
+            if (match) commitSelection(match);
+          }}
+          onKeyDown={e => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              if (exactMatch) commitSelection(exactMatch);
+              else if (trimmed) handleCreate();
+            }
+            if (e.key === 'Escape') { e.preventDefault(); setEditing(false); }
+          }}
+          onBlur={() => setEditing(false)}
+          style={inputStyle}
+        />
+        <datalist id={listId}>
+          {sorted.map(i => <option key={i.id} value={i.name} />)}
+        </datalist>
+        {canCreate && (
+          <button
+            type="button"
+            onMouseDown={e => e.preventDefault()}
+            onClick={handleCreate}
+            style={{
+              marginTop: 4,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+              fontSize: 12,
+              fontWeight: 500,
+              color: 'var(--purple)',
+              padding: '3px 6px',
+              borderRadius: 'var(--radius-sm)',
+            }}
+          >
+            <Plus size={11} />
+            Crear "{trimmed}"
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}
+      onClick={() => { setEditing(true); setText(currentEntity?.name || ''); }}
+    >
+      {currentEntity ? renderChip(currentEntity) : (
+        <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{emptyLabel}</span>
+      )}
+    </div>
+  );
+}
 
 function relativeTime(isoStr) {
   if (!isoStr) return '';
@@ -112,7 +225,7 @@ function FieldRow({ label, children }) {
 }
 
 // ── LeftPanel ─────────────────────────────────────────────────────────────────
-function LeftPanel({ deal, contacts, companies, updateDeal, usdToMxn }) {
+function LeftPanel({ deal, contacts, companies, updateDeal, usdToMxn, addCompany, addContact }) {
   const [editingField, setEditingField] = useState(null);
   const [fieldValue, setFieldValue] = useState('');
 
@@ -137,29 +250,6 @@ function LeftPanel({ deal, contacts, companies, updateDeal, usdToMxn }) {
     if (e.key === 'Enter') commitEdit(field);
     if (e.key === 'Escape') setEditingField(null);
   }
-
-  const inputStyle = {
-    width: '100%',
-    padding: '3px 7px',
-    border: '1px solid var(--purple)',
-    borderRadius: 'var(--radius-sm)',
-    fontSize: 13,
-    background: 'var(--bg)',
-    outline: 'none',
-    boxShadow: '0 0 0 3px rgba(124,92,252,0.12)',
-    fontFamily: 'inherit',
-  };
-
-  const clickableValue = {
-    fontSize: 13,
-    color: 'var(--text)',
-    cursor: 'text',
-    borderRadius: 'var(--radius-sm)',
-    padding: '2px 4px',
-    margin: '-2px -4px',
-    display: 'inline-block',
-    transition: 'background var(--transition)',
-  };
 
   return (
     <div className="dp-left-panel" style={{
@@ -355,85 +445,45 @@ function LeftPanel({ deal, contacts, companies, updateDeal, usdToMxn }) {
 
       {/* Company */}
       <FieldRow label="Company">
-        {editingField === 'company_id' ? (
-          <>
-            <input
-              autoFocus
-              list="dp-company-list"
-              value={fieldValue}
-              placeholder="Search company…"
-              onChange={e => {
-                setFieldValue(e.target.value);
-                const match = companies.find(c => c.name === e.target.value);
-                if (match) { updateDeal(deal.id, { company_id: match.id }); setEditingField(null); }
-              }}
-              onBlur={() => setEditingField(null)}
-              style={inputStyle}
-            />
-            <datalist id="dp-company-list">
-              {companies.slice(0, 300).map(c => <option key={c.id} value={c.name} />)}
-            </datalist>
-          </>
-        ) : (
-          <div
-            style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}
-            onClick={() => startEdit('company_id', company?.name || '')}
-          >
-            {company ? (
-              <>
-                <div style={{
-                  width: 16, height: 16, borderRadius: 3,
-                  background: getColor(company.name),
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 9, fontWeight: 700, color: 'white', flexShrink: 0,
-                }}>
-                  {company.name.charAt(0)}
-                </div>
-                <span style={{ fontSize: 13 }}>{company.name}</span>
-              </>
-            ) : (
-              <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>Add company</span>
-            )}
-          </div>
-        )}
+        <EntityField
+          items={companies}
+          currentEntity={company}
+          onSelect={id => updateDeal(deal.id, { company_id: id })}
+          onCreate={addCompany}
+          placeholder="Search company…"
+          emptyLabel="Add company"
+          renderChip={c => (
+            <>
+              <div style={{
+                width: 16, height: 16, borderRadius: 3,
+                background: getColor(c.name),
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 9, fontWeight: 700, color: 'white', flexShrink: 0,
+              }}>
+                {c.name.charAt(0)}
+              </div>
+              <span style={{ fontSize: 13 }}>{c.name}</span>
+            </>
+          )}
+        />
       </FieldRow>
 
       {/* Contact */}
       <FieldRow label="Contact">
-        {editingField === 'contact_id' ? (
-          <>
-            <input
-              autoFocus
-              list="dp-contact-list"
-              value={fieldValue}
-              placeholder="Search person…"
-              onChange={e => {
-                setFieldValue(e.target.value);
-                const match = contacts.find(c => c.name === e.target.value);
-                if (match) { updateDeal(deal.id, { contact_id: match.id }); setEditingField(null); }
-              }}
-              onBlur={() => setEditingField(null)}
-              style={inputStyle}
-            />
-            <datalist id="dp-contact-list">
-              {contacts.slice(0, 300).map(c => <option key={c.id} value={c.name} />)}
-            </datalist>
-          </>
-        ) : (
-          <div
-            style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}
-            onClick={() => startEdit('contact_id', contact?.name || '')}
-          >
-            {contact ? (
-              <>
-                <Avatar name={contact.name} size="sm" />
-                <span style={{ fontSize: 13 }}>{contact.name}</span>
-              </>
-            ) : (
-              <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>Add person</span>
-            )}
-          </div>
-        )}
+        <EntityField
+          items={contacts}
+          currentEntity={contact}
+          onSelect={id => updateDeal(deal.id, { contact_id: id })}
+          onCreate={addContact}
+          placeholder="Search person…"
+          emptyLabel="Add person"
+          renderChip={c => (
+            <>
+              <Avatar name={c.name} size="sm" />
+              <span style={{ fontSize: 13 }}>{c.name}</span>
+            </>
+          )}
+        />
       </FieldRow>
 
       {/* Notes text */}
@@ -789,16 +839,28 @@ function TasksTab({ deal, tasks, addTask, toggleTask, deleteTask }) {
 }
 
 // ── PeopleTab ─────────────────────────────────────────────────────────────────
-function PeopleTab({ deal, contacts, companies, updateDeal }) {
+function PeopleTab({ deal, contacts, companies, updateDeal, addContact }) {
   const [search, setSearch] = useState('');
   const contact = contacts.find(c => String(c.id) === String(deal.contact_id));
 
+  const dedupedContacts = useMemo(() => dedupeAndSort(contacts), [contacts]);
+
   const filtered = search.length > 1
-    ? contacts.filter(c =>
+    ? dedupedContacts.filter(c =>
         c.name.toLowerCase().includes(search.toLowerCase()) ||
         (c.email || '').toLowerCase().includes(search.toLowerCase())
       ).slice(0, 8)
     : [];
+
+  const exactMatch = search.trim() && dedupedContacts.find(c => c.name.toLowerCase() === search.trim().toLowerCase());
+
+  function handleCreate() {
+    const name = search.trim();
+    if (!name) return;
+    const created = addContact({ name });
+    updateDeal(deal.id, { contact_id: created.id });
+    setSearch('');
+  }
 
   return (
     <div style={{ padding: '20px 24px', overflowY: 'auto', flex: 1 }}>
@@ -871,6 +933,22 @@ function PeopleTab({ deal, contacts, companies, updateDeal }) {
       {search.length > 1 && filtered.length === 0 && (
         <p style={{ fontSize: 12.5, color: 'var(--text-muted)', padding: '8px 10px' }}>No contacts found.</p>
       )}
+      {search.trim() && !exactMatch && (
+        <div
+          onClick={handleCreate}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            padding: '7px 10px', borderRadius: 'var(--radius-md)',
+            cursor: 'pointer', color: 'var(--purple)', fontSize: 13, fontWeight: 500,
+            transition: 'background var(--transition)',
+          }}
+          onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-secondary)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+        >
+          <Plus size={13} />
+          Crear "{search.trim()}"
+        </div>
+      )}
     </div>
   );
 }
@@ -880,6 +958,7 @@ export default function DealDetailPage({
   dealId, deals, contacts, companies,
   activities, tasks, notes, usdToMxn,
   updateDeal, archiveDeal, addTask, toggleTask, deleteTask, addNote, deleteNote,
+  addCompany, addContact,
   onBack,
 }) {
   const [activeTab, setActiveTab] = useState('overview');
@@ -929,6 +1008,8 @@ export default function DealDetailPage({
           companies={companies}
           updateDeal={updateDeal}
           usdToMxn={usdToMxn}
+          addCompany={addCompany}
+          addContact={addContact}
         />
 
         {/* Right panel */}
@@ -973,7 +1054,7 @@ export default function DealDetailPage({
             {activeTab === 'activity' && <ActivityTab deal={deal} activities={activities} />}
             {activeTab === 'notes'    && <NotesTab deal={deal} notes={notes} addNote={addNote} deleteNote={deleteNote} />}
             {activeTab === 'tasks'    && <TasksTab deal={deal} tasks={tasks} addTask={addTask} toggleTask={toggleTask} deleteTask={deleteTask} />}
-            {activeTab === 'people'   && <PeopleTab deal={deal} contacts={contacts} companies={companies} updateDeal={updateDeal} />}
+            {activeTab === 'people'   && <PeopleTab deal={deal} contacts={contacts} companies={companies} updateDeal={updateDeal} addContact={addContact} />}
           </div>
         </div>
       </div>

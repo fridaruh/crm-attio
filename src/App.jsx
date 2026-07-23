@@ -120,6 +120,8 @@ export default function App() {
             deleteTask={deleteTask}
             addNote={addNote}
             deleteNote={deleteNote}
+            addCompany={addCompany}
+            addContact={addContact}
             onBack={() => setSelectedDealId(null)}
           />
         ) : view === 'deals' && (
@@ -213,6 +215,8 @@ export default function App() {
           companies={companies}
           contacts={contacts}
           onSave={addDeal}
+          onAddCompany={addCompany}
+          onAddContact={addContact}
           onClose={() => setShowAddDeal(false)}
         />
       )}

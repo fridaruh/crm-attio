@@ -307,6 +307,7 @@ a { text-decoration: none; color: inherit; }
   flex-direction: column;
   gap: 5px;
   margin-bottom: 14px;
+  min-width: 0;
 }
 
 .form-field label {
@@ -318,6 +319,8 @@ a { text-decoration: none; color: inherit; }
 .form-field input,
 .form-field select,
 .form-field textarea {
+  width: 100%;
+  min-width: 0;
   padding: 7px 10px;
   border: 1px solid var(--border-dark);
   border-radius: var(--radius-sm);

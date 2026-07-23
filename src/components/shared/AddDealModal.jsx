@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { X } from 'lucide-react';
+import { dedupeAndSort } from '../../utils/dedupe';
 
 const STAGES = [
   { value: 'Lead',             label: 'Lead' },
@@ -10,7 +11,64 @@ const STAGES = [
   { value: 'Pagado',           label: 'Pagado' },
 ];
 
-export default function AddDealModal({ defaultStage, companies, contacts, onSave, onClose }) {
+function CreatableSelect({ items, value, onChange, onCreate, placeholder, newLabel, newPlaceholder }) {
+  const [creating, setCreating] = useState(false);
+  const [newName, setNewName] = useState('');
+
+  function handleSelect(e) {
+    if (e.target.value === '__new__') {
+      setCreating(true);
+      setNewName('');
+      return;
+    }
+    onChange(e.target.value);
+  }
+
+  function handleCreate() {
+    const name = newName.trim();
+    if (!name) return;
+    const created = onCreate({ name });
+    onChange(created.id);
+    setCreating(false);
+    setNewName('');
+  }
+
+  if (creating) {
+    return (
+      <div style={{ display: 'flex', gap: 6 }}>
+        <input
+          autoFocus
+          placeholder={newPlaceholder}
+          value={newName}
+          onChange={e => setNewName(e.target.value)}
+          onKeyDown={e => {
+            if (e.key === 'Enter') { e.preventDefault(); handleCreate(); }
+            if (e.key === 'Escape') { e.preventDefault(); setCreating(false); }
+          }}
+          style={{ flex: 1, minWidth: 0 }}
+        />
+        <button type="button" className="btn-secondary" onClick={() => setCreating(false)}>
+          Cancel
+        </button>
+        <button type="button" className="btn-primary" onClick={handleCreate}>
+          Add
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <select value={value} onChange={handleSelect}>
+      <option value="">{placeholder}</option>
+      <option value="__new__">{newLabel}</option>
+      {items.map(item => (
+        <option key={item.id} value={item.id}>{item.name}</option>
+      ))}
+    </select>
+  );
+}
+
+export default function AddDealModal({ defaultStage, companies, contacts, onSave, onAddCompany, onAddContact, onClose }) {
   const [form, setForm] = useState({
     name: '',
     company_id: '',
@@ -23,6 +81,9 @@ export default function AddDealModal({ defaultStage, companies, contacts, onSave
     close_date: '',
     notes: '',
   });
+
+  const sortedCompanies = useMemo(() => dedupeAndSort(companies), [companies]);
+  const sortedContacts  = useMemo(() => dedupeAndSort(contacts), [contacts]);
 
   const set = (field) => (e) => setForm(prev => ({ ...prev, [field]: e.target.value }));
 
@@ -84,22 +145,28 @@ export default function AddDealModal({ defaultStage, companies, contacts, onSave
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div className="form-field">
                 <label>Company</label>
-                <select value={form.company_id} onChange={set('company_id')}>
-                  <option value="">— Select company —</option>
-                  {companies.map(c => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
+                <CreatableSelect
+                  items={sortedCompanies}
+                  value={form.company_id}
+                  onChange={id => setForm(prev => ({ ...prev, company_id: id }))}
+                  onCreate={onAddCompany}
+                  placeholder="— Select company —"
+                  newLabel="+ Create new company…"
+                  newPlaceholder="New company name"
+                />
               </div>
 
               <div className="form-field">
                 <label>Contact</label>
-                <select value={form.contact_id} onChange={set('contact_id')}>
-                  <option value="">— Select contact —</option>
-                  {contacts.map(c => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
+                <CreatableSelect
+                  items={sortedContacts}
+                  value={form.contact_id}
+                  onChange={id => setForm(prev => ({ ...prev, contact_id: id }))}
+                  onCreate={onAddContact}
+                  placeholder="— Select contact —"
+                  newLabel="+ Create new contact…"
+                  newPlaceholder="New contact name"
+                />
               </div>
             </div>
 
